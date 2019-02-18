@@ -40,7 +40,7 @@ Ok, there is a little more to it than just that.
 
 Just like a UI Aggregation, to set up a Dax Aggregation, you need a data model with two tables about the same facts. For this article, we’re going to be using the [Wide World Importers](https://docs.microsoft.com/en-us/sql/samples/wide-world-importers-what-is?view=sql-server-2017) sample Data Warehouse available from Microsoft. Not the OLTP DB. I don’t know anything about OLTP. 
 
-For this example, we'll use the ‘Fact Sale’ table and all its related dimensions. I’ve created also an aggregate table, ‘Fact Sale Agg’ that excludes Invoice Date, Delivery Customer (as distinct from Bill To Customer), and Employee ID as dimensions, as well as grouped away the row specific degenerate dimensions in fact table.
+For this example, we'll use the ‘Fact Sale’ table and all its related dimensions. I’ve also created  an aggregate table, ‘Fact Sale Agg’ that excludes Invoice Date, Delivery Customer (as distinct from Bill To Customer), and Employee ID as dimensions, as well as grouped away the row specific degenerate dimensions in fact table.
 
 ![Relationship Diagram of Example Data Model](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/WWI%20Agg%20Model%20Example.png?raw=true "Relationship Diagram")
 
