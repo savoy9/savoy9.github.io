@@ -52,14 +52,12 @@ The aggregation feature uses the information you provide in relationships and th
 
 Let's try to do that in DAX. For a single column, it might look like this:
 
-~~~
-Dax Aggregation Measure :=
-IF (
-  ISFILTERED ( 'table[Column] ),
-  [Detail Table Measure],
-  [Aggregated Table Measure]
-)
-~~~
+    Dax Aggregation Measure :=
+    IF (
+    ISFILTERED ( 'table[Column] ),
+    [Detail Table Measure],
+    [Aggregated Table Measure]
+    )
 
 Thats easy enough. How would we expand this pattern to more columns? By using way too many OR() statements. Except, we don’t want to use [OR()](https://dax.guide/or/) because it only takes two arguments. Instead, we want to use the Or Operator, [\|\|](https://dax.guide/op/or/) because it expands to n arguments. And we're going to need n arguments.
 
@@ -67,24 +65,23 @@ Thats easy enough. How would we expand this pattern to more columns? By using wa
  *Returns true when there are direct filters on the specified column.*
 
 As a result we need to list every single column that filters the detail table that we’ve excluded from Aggregate Table. Like this:
-~~~
-Dax Aggregation Measure :=
-IF (
-  ISFILTERED ( 'table 1'[Column1] )
+
+    Dax Aggregation Measure :=
+    IF (
+    ISFILTERED ( 'table 1'[Column1] )
     || ISFILTERED ( 'table 1'[Column 2] )
     || ISFILTERED ( 'table 2'[Column 3] )
     ...
     || ISFILTERED ( 'table n'[Column m] ),
-  [Detail Table Measure],
-  [Aggregated Table Measure]
-)
-~~~
+    [Detail Table Measure],
+    [Aggregated Table Measure]
+    )
+
 Applied to our example model, this pattern becomes:
 
-~~~
-Total Sales DAX Agg :=
-IF (
-  ISFILTERED ( 'Dimension Employee'[Employee] )
+    Total Sales DAX Agg :=
+    IF (
+    ISFILTERED ( 'Dimension Employee'[Employee] )
     || ISFILTERED ( 'Dimension Employee'[Employee Key] )
     || ISFILTERED ( 'Dimension Employee'[Employee] )
     || ISFILTERED ( 'Dimension Employee'[Is Salesperson] )
@@ -102,10 +99,9 @@ IF (
     || ISFILTERED ( 'Fact Sale'[Package] )
     || ISFILTERED ( 'Fact Sale'[Salesperson Key] )
     || ISFILTERED ( 'Fact Sale'[Delivery Date Key] ),
-  [Total Sales Detail],
-  [Total Sales Agg]
-)
-~~~
+    [Total Sales Detail],
+    [Total Sales Agg]
+    )
 
 What a mess of code. And that’s with a relatively small number of excluded dimensions.
 
