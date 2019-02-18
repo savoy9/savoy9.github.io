@@ -59,7 +59,7 @@ Let's try to do that in DAX. For a single column, it might look like this:
         [Aggregated Table Measure]
     )
 
-Thats easy enough. How would we expand this pattern to more columns? By using way too many OR() statements. Except, we don’t want to use [OR()](https://dax.guide/or/) because it only takes two arguments. Instead, we want to use the Or Operator, [\||\](https://dax.guide/op/or/) because it expands to n arguments. And we're going to need n arguments.
+Thats easy enough. How would we expand this pattern to more columns? By using way too many OR() statements. Except, we don’t want to use [OR()](https://dax.guide/or/) because it only takes two arguments. Instead, we want to use the Or Operator, [\|\|](https://dax.guide/op/or/) because it expands to n arguments. And we're going to need n arguments.
 
  >[ISFILTERED()](https://dax.guide/isfiltered/)
  *Returns true when there are direct filters on the specified column.*
