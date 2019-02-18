@@ -2,7 +2,7 @@
 layout: post
 title: Dax Aggregations Part 1
 ---
-**Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so](https://twitter.com/GuyInACube/status/1073693688155529216) too. The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already learn about them, you should read more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
+**Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so too](https://twitter.com/GuyInACube/status/1073693688155529216). The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already know about them, you should learn more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
 ) [other](http://radacad.com/dual-storage-mode-the-most-important-configuration-for-aggregations-step-2-power-bi-aggregations) [places](radacad.com/power-bi-aggregations-step-3-configure-aggregation-functions-and-test-aggregations-in-action) first.
 
 This article isn’t about using Aggregations. It’s about how you can…not use them. I’m going to explain how to create “aggregations” without using the Aggregations feature.
@@ -15,7 +15,7 @@ I’m also going to tell you why you might want to do that.
 
 In the article its going to be important to have a clear distinct between the Aggregations feature, configured in the UI and the Dax Measures that use the pattern described below. I’m going to call these measures DAX Aggregations. In contrast with UI Aggregations.
 
-Why?
+Why
 --
 
 I can think of four reasons.
@@ -31,7 +31,7 @@ RLS is how I came upon this topic. I needed to secure different granularities di
 
 There are many different ways you might want to control granularity security so I expect this technique to still be valuable even when RLS and UI Aggs work together. Which is why I'm writing about it. Also because doing things you probably shouldn't using DAX is fun.
 
-How??
+How
 --
 
 You use [IsFiltered()](https://dax.guide/isfiltered/). That’s all there is to it. Move along.
@@ -78,10 +78,10 @@ We might also be able to use IsCrossFiltered(). However, this is where the big c
 
 For now, at least, we’ve got a whole mess of Dax. Remind me, why this is a good idea?
 
-Should???
+Should
 --
 
-So, sould this be considered an acceptable solution. The main downside is complexity. You have to set up a measure with dozens of lines for every fact in your Agg table. Also, while I haven't tested this explicitly, my understanding is the If(IsFiltered()) pattern is Formula Engine territory, so you aren't going to want to nest your Dax Agg function inside an iterator. If you have any measures using sumx or the like, you'll want to setup separate Dax Aggregation measures for them too.
+Should this be considered an acceptable solution? The main downside is complexity. You have to set up a measure with dozens of lines for every fact in your Agg table. Also, while I haven't tested this explicitly, my understanding is the If(IsFiltered()) pattern is Formula Engine territory, so you aren't going to want to nest your Dax Agg function inside an iterator. If you have any measures using sumx or the like, you'll want to setup separate Dax Aggregation measures for them too.
 
 Measuring performance is complicated. There are a lot variables that can change your results and I've ignored most of them, so your mileage may vary considerably. 
 
@@ -102,6 +102,6 @@ As a result, I would recommend using this technique only if UI Aggregations are 
 
 Also, DAX is fun.
 
-**Part 2**, on applying RLS and this pattern to WWIs is coming soon.
+**Part 2**, on applying RLS and this pattern together in the WWI sample model is coming soon.
 
 >Disclaimer: I work for Microsoft. More specifically, I work for Microsoft Advertising. We sell the ads that are served on Microsoft websites. Mostly Bing. Much to my chagrin, I don’t have any of that [sweet sweet inside information](https://twitter.com/GuyInACube/status/1073692665571655681) about Power BI. Views are my own.
