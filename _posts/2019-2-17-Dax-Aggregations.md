@@ -18,7 +18,7 @@ In the article its going to be important to have a clear distinct between the Ag
 Why
 --
 
-I can think of four reasons.
+I can think of four reasons to use this pattern.
 1. No plans have been announced for UI Aggregations to be available in Analysis Services.
 2. Currently, you cannot set up a [UI Aggregation over a table in Import storage mode](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations#validations).
 ![No Aggs over Import Tables PBI Desktop Error Message](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/DQ%20Required.png?raw=true "DQ Required")
