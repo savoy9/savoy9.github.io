@@ -2,7 +2,7 @@
 layout: post
 title: Dax Aggregations Part 1
 ---
-2**Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so](https://twitter.com/GuyInACube/status/1073693688155529216) too. The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already learn about them, you should read more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
+3 **Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so](https://twitter.com/GuyInACube/status/1073693688155529216) too. The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already learn about them, you should read more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
 ) [other](http://radacad.com/dual-storage-mode-the-most-important-configuration-for-aggregations-step-2-power-bi-aggregations) [places](radacad.com/power-bi-aggregations-step-3-configure-aggregation-functions-and-test-aggregations-in-action) first.
 
 This article isn’t about using Aggregations. It’s about how you can…not use them. I’m going to explain how to create “aggregations” without using the Aggregations feature.
@@ -52,12 +52,14 @@ The aggregation feature uses the information you provide in relationships and th
 
 Let's try to do that in DAX. For a single column, it might look like this:
 
-    Dax Aggregation Measure :=
-    IF (
-        ISFILTERED ( 'table[Column] ),
-        [Detail Table Measure],
-        [Aggregated Table Measure]
-    )
+~~~
+Dax Aggregation Measure :=
+IF (
+  ISFILTERED ( 'table[Column] ),
+  [Detail Table Measure],
+  [Aggregated Table Measure]
+)
+~~~
 
 Thats easy enough. How would we expand this pattern to more columns? By using way too many OR() statements. Except, we don’t want to use [OR()](https://dax.guide/or/) because it only takes two arguments. Instead, we want to use the Or Operator, [\|\|](https://dax.guide/op/or/) because it expands to n arguments. And we're going to need n arguments.
 
@@ -68,41 +70,43 @@ As a result we need to list every single column that filters the detail table th
 ~~~
 Dax Aggregation Measure :=
 IF (
-    ISFILTERED ( 'table 1'[Column1] )
-        || ISFILTERED ( 'table 1'[Column 2] )
-        || ISFILTERED ( 'table 2'[Column 3] )
-        ...
-        || ISFILTERED ( 'table n'[Column m] ),
-    [Detail Table Measure],
-    [Aggregated Table Measure]
+  ISFILTERED ( 'table 1'[Column1] )
+    || ISFILTERED ( 'table 1'[Column 2] )
+    || ISFILTERED ( 'table 2'[Column 3] )
+    ...
+    || ISFILTERED ( 'table n'[Column m] ),
+  [Detail Table Measure],
+  [Aggregated Table Measure]
 )
 ~~~
 Applied to our example model, this pattern becomes:
+
 ~~~
 Total Sales DAX Agg :=
-    IF (
-        ISFILTERED ( 'Dimension Employee'[Employee] )
-        || ISFILTERED ( 'Dimension Employee'[Employee Key] )
-        || ISFILTERED ( 'Dimension Employee'[Employee] )
-        || ISFILTERED ( 'Dimension Employee'[Is Salesperson] )
-        || ISFILTERED ( 'Dimension Employee'[Preferred Name] )
-        || ISFILTERED ( 'Dimension Invoice Date'[Date] )
-        || ISFILTERED ( 'Dimension Invoice Date'[Calendar Month Label] )
-        || ISFILTERED ( 'Dimension Invoice Date'[Calendar Year Label] )
-        || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Month Label] )
-        || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Year Label] )
-        || ISFILTERED ( 'Dimension Invoice Date'[ISO Week Number] )
-        || ISFILTERED ( 'Dimension Invoice Date'[Month] )
-        || ISFILTERED ( 'Dimension Invoice Date'[Short Month] )
-        || ISFILTERED ( 'Dimension Invoice Date'[Day] )
-        || ISFILTERED ( 'Fact Sale'[Description] )
-        || ISFILTERED ( 'Fact Sale'[Package] )
-        || ISFILTERED ( 'Fact Sale'[Salesperson Key] )
-        || ISFILTERED ( 'Fact Sale'[Delivery Date Key] ),
-    [Total Sales Detail],
-    [Total Sales Agg]
+IF (
+  ISFILTERED ( 'Dimension Employee'[Employee] )
+    || ISFILTERED ( 'Dimension Employee'[Employee Key] )
+    || ISFILTERED ( 'Dimension Employee'[Employee] )
+    || ISFILTERED ( 'Dimension Employee'[Is Salesperson] )
+    || ISFILTERED ( 'Dimension Employee'[Preferred Name] )
+    || ISFILTERED ( 'Dimension Invoice Date'[Date] )
+    || ISFILTERED ( 'Dimension Invoice Date'[Calendar Month Label] )
+    || ISFILTERED ( 'Dimension Invoice Date'[Calendar Year Label] )
+    || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Month Label] )
+    || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Year Label] )
+    || ISFILTERED ( 'Dimension Invoice Date'[ISO Week Number] )
+    || ISFILTERED ( 'Dimension Invoice Date'[Month] )
+    || ISFILTERED ( 'Dimension Invoice Date'[Short Month] )
+    || ISFILTERED ( 'Dimension Invoice Date'[Day] )
+    || ISFILTERED ( 'Fact Sale'[Description] )
+    || ISFILTERED ( 'Fact Sale'[Package] )
+    || ISFILTERED ( 'Fact Sale'[Salesperson Key] )
+    || ISFILTERED ( 'Fact Sale'[Delivery Date Key] ),
+  [Total Sales Detail],
+  [Total Sales Agg]
 )
-~~~~
+~~~
+
 What a mess of code. And that’s with a relatively small number of excluded dimensions.
 
 Can we simplify it? Maybe. There is no equivalent IsTableFiltered() function which returns true if any of the columns in the table are explicitly filtered. We could compare the number of rows in COUNTROWS(Table) with CALCULATE(COUNTROWS(Table),ALL(Table)). I haven’t tested it, but that doesn’t sound very fast.
