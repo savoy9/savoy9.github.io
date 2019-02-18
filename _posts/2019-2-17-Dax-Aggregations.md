@@ -2,7 +2,7 @@
 layout: post
 title: Dax Aggregations Part 1
 ---
-**Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so](https://twitter.com/GuyInACube/status/1073693688155529216) too. The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already learn about them, you should read more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
+1**Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so](https://twitter.com/GuyInACube/status/1073693688155529216) too. The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already learn about them, you should read more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
 ) [other](http://radacad.com/dual-storage-mode-the-most-important-configuration-for-aggregations-step-2-power-bi-aggregations) [places](radacad.com/power-bi-aggregations-step-3-configure-aggregation-functions-and-test-aggregations-in-action) first.
 
 This article isn’t about using Aggregations. It’s about how you can…not use them. I’m going to explain how to create “aggregations” without using the Aggregations feature.
@@ -51,7 +51,6 @@ If the answer to that question is yes, then the query must be evaluated against 
 The aggregation feature uses the information you provide in relationships and the group by options in the UI to determine the answer to that question. Then it uses the answer to that question to switch the column refrenced by any measure using the specified operations to the correct column in the aggregated table automatically.
 
 Let's try to do that in DAX. For a single column, it might look like this:
-
     Dax Aggregation Measure :=
     IF (
         ISFILTERED ( 'table[Column] ),
@@ -65,7 +64,6 @@ Thats easy enough. How would we expand this pattern to more columns? By using wa
  *Returns true when there are direct filters on the specified column.*
 
 As a result we need to list every single column that filters the detail table that we’ve excluded from Aggregate Table. Like this:
-
     Dax Aggregation Measure :=
     IF (
         ISFILTERED ( 'table 1'[Column1] )
@@ -78,7 +76,6 @@ As a result we need to list every single column that filters the detail table th
     )
 
 Applied to our example model, this pattern becomes:
-
     Total Sales DAX Agg :=
     IF (
         ISFILTERED ( 'Dimension Employee'[Employee] )
