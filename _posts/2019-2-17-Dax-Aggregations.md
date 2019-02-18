@@ -15,7 +15,7 @@ I’m also going to tell you why you might want to do that.
 
 In the article its going to be important to have a clear distinct between the Aggregations feature, configured in the UI and the Dax Measures that use the pattern described below. I’m going to call these measures DAX Aggregations. In contrast with UI Aggregations.
 
-##Why?
+## Why?
 
 I can think of four reasons.
 1. No plans have been announced for UI Aggregations to be available in Analysis Services.
