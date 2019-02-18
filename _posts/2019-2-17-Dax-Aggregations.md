@@ -2,10 +2,6 @@
 layout: post
 title: Dax Aggregations Part 1
 ---
-
-
->Disclaimer: I work for Microsoft. More specifically, I work for Microsoft Advertising. We sell the ads that are served on Microsoft websites. Mostly Bing. Much to my chagrin, I don’t have any of that [sweet sweet inside information](https://twitter.com/GuyInACube/status/1073692665571655681) about Power BI. Views are my own.
-
 **Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so](https://twitter.com/GuyInACube/status/1073693688155529216) too. The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already learn about them, you should read more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
 ) [other](http://radacad.com/dual-storage-mode-the-most-important-configuration-for-aggregations-step-2-power-bi-aggregations) [places](radacad.com/power-bi-aggregations-step-3-configure-aggregation-functions-and-test-aggregations-in-action) first.
 
@@ -125,4 +121,6 @@ As a result, I would recommend using this technique only if UI Aggregations are 
 
 Also, DAX is fun.
 
-Part 2, on applying RLS and this pattern to WWIs is coming soon.
+**Part 2**, on applying RLS and this pattern to WWIs is coming soon.
+
+>Disclaimer: I work for Microsoft. More specifically, I work for Microsoft Advertising. We sell the ads that are served on Microsoft websites. Mostly Bing. Much to my chagrin, I don’t have any of that [sweet sweet inside information](https://twitter.com/GuyInACube/status/1073692665571655681) about Power BI. Views are my own.
