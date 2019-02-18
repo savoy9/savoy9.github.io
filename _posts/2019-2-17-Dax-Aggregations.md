@@ -35,7 +35,9 @@ How
 --
 
 You use [IsFiltered()](https://dax.guide/isfiltered/). That’s all there is to it. Move along.
+<br>
 …
+<br>
 Ok, there is a little more to it than just that.
 
 Just like a UI Aggregation, to set up a Dax Aggregation, you need a data model with two tables about the same facts. For this article, we’re going to be using the [Wide World Importers](https://docs.microsoft.com/en-us/sql/samples/wide-world-importers-what-is?view=sql-server-2017) sample Data Warehouse available from Microsoft. Not the OLTP DB. I don’t know anything about OLTP. 
