@@ -2,7 +2,7 @@
 layout: post
 title: Dax Aggregations Part 1
 ---
-4 **Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so](https://twitter.com/GuyInACube/status/1073693688155529216) too. The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already learn about them, you should read more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
+**Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so](https://twitter.com/GuyInACube/status/1073693688155529216) too. The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already learn about them, you should read more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
 ) [other](http://radacad.com/dual-storage-mode-the-most-important-configuration-for-aggregations-step-2-power-bi-aggregations) [places](radacad.com/power-bi-aggregations-step-3-configure-aggregation-functions-and-test-aggregations-in-action) first.
 
 This article isn’t about using Aggregations. It’s about how you can…not use them. I’m going to explain how to create “aggregations” without using the Aggregations feature.
@@ -52,12 +52,8 @@ The aggregation feature uses the information you provide in relationships and th
 
 Let's try to do that in DAX. For a single column, it might look like this:
 
-    Dax Aggregation Measure :=
-    IF (
-    ISFILTERED ( 'table[Column] ),
-    [Detail Table Measure],
-    [Aggregated Table Measure]
-    )
+>Dax&nbsp;Aggregation&nbsp;Measure&nbsp;:=<br><span class="Keyword" style="color:#0070FF">IF</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;table[Column]&nbsp;<span class="Parenthesis" style="color:#969696">)</span>,<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Detail&nbsp;Table&nbsp;Measure],<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Aggregated&nbsp;Table&nbsp;Measure]<br><span class="Parenthesis" style="color:#969696">)</span>
+![Daxformater.com Badge](https://www.daxformatter.com/wp-content/themes/daxformatter/images/daxformatter-embed.png "Daxformater.com")
 
 Thats easy enough. How would we expand this pattern to more columns? By using way too many OR() statements. Except, we don’t want to use [OR()](https://dax.guide/or/) because it only takes two arguments. Instead, we want to use the Or Operator, [\|\|](https://dax.guide/op/or/) because it expands to n arguments. And we're going to need n arguments.
 
@@ -66,42 +62,13 @@ Thats easy enough. How would we expand this pattern to more columns? By using wa
 
 As a result we need to list every single column that filters the detail table that we’ve excluded from Aggregate Table. Like this:
 
-    Dax Aggregation Measure :=
-    IF (
-    ISFILTERED ( 'table 1'[Column1] )
-    || ISFILTERED ( 'table 1'[Column 2] )
-    || ISFILTERED ( 'table 2'[Column 3] )
-    ...
-    || ISFILTERED ( 'table n'[Column m] ),
-    [Detail Table Measure],
-    [Aggregated Table Measure]
-    )
+>Dax&nbsp;Aggregation&nbsp;Measure&nbsp;:=<br><span class="Keyword" style="color:#0070FF">IF</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'table&nbsp;1'[Column1]&nbsp;<span class="Parenthesis" style="color:#969696">)<br></span><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'table&nbsp;1'[Column&nbsp;2]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'table&nbsp;2'[Column&nbsp;3]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'table&nbsp;n'[Column&nbsp;m]&nbsp;<span class="Parenthesis" style="color:#969696">)</span>,<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Detail&nbsp;Table&nbsp;Measure],<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Aggregated&nbsp;Table&nbsp;Measure]<br><span class="Parenthesis" style="color:#969696">)</span> 
+![Daxformater.com Badge](https://www.daxformatter.com/wp-content/themes/daxformatter/images/daxformatter-embed.png "Daxformater.com")
 
 Applied to our example model, this pattern becomes:
 
-    Total Sales DAX Agg :=
-    IF (
-    ISFILTERED ( 'Dimension Employee'[Employee] )
-    || ISFILTERED ( 'Dimension Employee'[Employee Key] )
-    || ISFILTERED ( 'Dimension Employee'[Employee] )
-    || ISFILTERED ( 'Dimension Employee'[Is Salesperson] )
-    || ISFILTERED ( 'Dimension Employee'[Preferred Name] )
-    || ISFILTERED ( 'Dimension Invoice Date'[Date] )
-    || ISFILTERED ( 'Dimension Invoice Date'[Calendar Month Label] )
-    || ISFILTERED ( 'Dimension Invoice Date'[Calendar Year Label] )
-    || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Month Label] )
-    || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Year Label] )
-    || ISFILTERED ( 'Dimension Invoice Date'[ISO Week Number] )
-    || ISFILTERED ( 'Dimension Invoice Date'[Month] )
-    || ISFILTERED ( 'Dimension Invoice Date'[Short Month] )
-    || ISFILTERED ( 'Dimension Invoice Date'[Day] )
-    || ISFILTERED ( 'Fact Sale'[Description] )
-    || ISFILTERED ( 'Fact Sale'[Package] )
-    || ISFILTERED ( 'Fact Sale'[Salesperson Key] )
-    || ISFILTERED ( 'Fact Sale'[Delivery Date Key] ),
-    [Total Sales Detail],
-    [Total Sales Agg]
-    )
+>Total&nbsp;Sales&nbsp;DAX&nbsp;Agg&nbsp;:=<br><span class="Keyword" style="color:#0070FF">IF</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Is&nbsp;Salesperson]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Preferred&nbsp;Name]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Date]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Calendar&nbsp;Month&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Calendar&nbsp;Year&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Fiscal&nbsp;Month&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Fiscal&nbsp;Year&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[ISO&nbsp;Week&nbsp;Number]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Month]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Short&nbsp;Month]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Day]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Description]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Package]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Salesperson&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Delivery&nbsp;Date&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span>,<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Total&nbsp;Sales&nbsp;Detail],<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Total&nbsp;Sales&nbsp;Agg]<br><span class="Parenthesis" style="color:#969696">)</span>
+![Daxformater.com Badge](https://www.daxformatter.com/wp-content/themes/daxformatter/images/daxformatter-embed.png "Daxformater.com")
 
 What a mess of code. And that’s with a relatively small number of excluded dimensions.
 
