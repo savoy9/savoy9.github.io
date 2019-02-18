@@ -15,7 +15,8 @@ I’m also going to tell you why you might want to do that.
 
 In the article its going to be important to have a clear distinct between the Aggregations feature, configured in the UI and the Dax Measures that use the pattern described below. I’m going to call these measures DAX Aggregations. In contrast with UI Aggregations.
 
-## Why?
+Why?
+--
 
 I can think of four reasons.
 1. No plans have been announced for UI Aggregations to be available in Analysis Services.
@@ -30,7 +31,8 @@ RLS is how I came upon this topic. I needed to secure different granularities di
 
 There are many different ways you might want to control granularity security so I expect this technique to still be valuable even when RLS and UI Aggs work together. Which is why I'm writing about it. Also because doing things you probably shouldn't using DAX is fun.
 
-##How??
+How??
+--
 
 You use [IsFiltered()](https://dax.guide/isfiltered/). That’s all there is to it. Move along.
 …
@@ -49,23 +51,24 @@ If the answer to that question is yes, then the query must be evaluated against 
 The aggregation feature uses the information you provide in relationships and the group by options in the UI to determine the answer to that question. Then it uses the answer to that question to switch the column refrenced by any measure using the specified operations to the correct column in the aggregated table automatically.
 
 Let's try to do that in DAX. For a single column, it might look like this:
-~~~
+
+~
 Measure :=
 IF (
     ISFILTERED ( 'table[Column] ),
     [Granular Table Measure],
     [Aggregated Table Measure]
 )
-~~~
+~
 
 Thats easy enough. How would we expand this pattern to more columns? By using way too many OR() statements. Except, we don’t want to use [OR()](https://dax.guide/or/) because it only takes two arguments. Instead, we want to use the Or Operator, [||](https://dax.guide/op/or/) because it expands to n arguments. And we're going to need n arguments.
 
  >[ISFILTERED()](https://dax.guide/isfiltered/):
- *“Returns true when there are direct filters on the specified column.”*
+ *Returns true when there are direct filters on the specified column.*
 
 As a result we need to list every single column that filters the detail table that we’ve excluded from Aggregate Table. Like this:
 
-~~~
+~
 Total Sales DAX Agg :=
 IF (
     ISFILTERED ( 'Dimension Employee'[Employee] )
@@ -89,7 +92,7 @@ IF (
     [Total Sales Detail],
     [Total Sales Agg]
 )
-~~~
+~
 
 What a mess of code. And that’s with a relatively small number of excluded dimensions.
 
@@ -99,7 +102,8 @@ We might also be able to use IsCrossFiltered(). However, this is where the big c
 
 For now, at least, we’ve got a whole mess of Dax. Remind me, why this is a good idea?
 
-##Should???
+Should???
+--
 
 So, sould this be considered an acceptable solution. The main downside is complexity. You have to set up a measure with dozens of lines for every fact in your Agg table. Also, while I haven't tested this explicitly, my understanding is the If(IsFiltered()) pattern is Formula Engine territory, so you aren't going to want to nest your Dax Agg function inside an iterator. If you have any measures using sumx or the like, you'll want to setup separate Dax Aggregation measures for them too.
 
