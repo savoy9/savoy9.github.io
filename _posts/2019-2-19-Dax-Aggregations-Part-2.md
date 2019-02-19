@@ -11,11 +11,11 @@ Let’s talk about World Wide Importer. Not the database, but the business. They
 
 Now that I'm in charge of this company, its time to impose some good old fashion capitalism.
 
-First, to properly motivate the sales force, we're going pays the sales people commission or revenue-based incentive (like Bing!). HR doesn't like it when people know what their peers make, so as to keep people paid as little as possible. As a result employee sales data is confidential.
+ First, to properly motivate the sales force, we're going pays the sales team commission on revenue generated. HR doesn't like it when people know what their peers make, so as to keep people paid as little as possible. As a result employee sales data is confidential.
 
-Second, we will impose order. We'll hire management, operations staff, and most importantly, analysts to help run the show and set sales targets for our new commission payments. Neither Sales Operations or Sales Management appear in the data warehouse yet so I'm going to have to create that data. We'll want to be able to filter by manager in our reporting. However, HR still doesn't want sales managers knowing how their peers are getting paid.
+Second, we will impose order. We'll hire management, operations staff, and most importantly, **analysts** to help run the show and set sales targets for our new commission system. Neither Sales Operations or Sales Management appear in the data warehouse yet so I'm going to have to create that data. We'll want to be able to filter by manager in our reporting. However, HR still doesn't want sales managers knowing how their peers are getting paid.
 
-Some operations staff is assigned directly to a specific sales team rather than HQ (like me!). This might be distinct from the company’s actual organizational structure. As a result, their access to employee sales data from needs to be limited to just the employees they are responsible for. We can pull org structure out of the HR database, but this kind of conditional access is going to need something more...custom.
+Some operations staff is assigned directly to a specific sales team rather than HQ. This might be distinct from the company’s actual organizational structure. As a result, their access to employee sales data from needs to be limited to just the employees they are responsible for. We can pull org structure out of the HR database, but this kind of conditional access is going to need something more...custom.
 
 Finally, this new management class will need reporting. We want to provide a single data model that can be accessed by the whole company and we want as many dimensions as possible to be available to everyone. We want to make sure that even Sales Managers can navigate the model using Analyze in Excel.
 
