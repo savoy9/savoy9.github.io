@@ -3,7 +3,7 @@ layout: post
 title: Dax Aggregations Part 2 - Row Level Security with Delegate Access and DAX Aggregations
 ---
 
-Now that we’ve established the why and how of manual aggregations (link), let’s dive into applications. Specifically, how we might pair this with Row Level Security. Or at least how I *did* pair it with RLS. This post assumes you have read part 1. You have been warned.
+Now that we’ve established the why and how of [Dax aggregations](https://savoy9.github.io/Dax-Aggregations/), let’s dive into applications. Specifically, how we might pair this with Row Level Security. Or at least how I *did* pair it with RLS. This post assumes you have read part 1. You have been warned.
 
 Let’s talk about World Wide Importer. Not the database, but the business. They sell stuff. From looking at the data,  it looks like they mostly sell coffee mugs to DBAs and Devs. Somehow, they employ over 100 salespeople in this endeavor. They also employ a bunch of people to move them around the warehouse. All of these employees are listed in our model in 'Dimension Employee'. 'Fact Sale' rows are related to salespeople, and other fact tables in the model are related to warehouse staff. However, 'Dimension Employee' doesn't mention anything about anyone managing these people. Never the less, this anarchical mug factory has generated appears to have $168 millon in sales.
 
