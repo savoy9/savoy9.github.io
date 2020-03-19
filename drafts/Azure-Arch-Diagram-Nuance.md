@@ -4,9 +4,8 @@ title: The Necessary Details That Aren’t Shown in Your Azure BI Architecture D
 ---
 ## Or, How the difference between direct query, live connect, and import impact data infastructure.
 
->When we talk about Azure architectures for data warehousing or analytics, we usually show a diagram that looks like the below.
-*<p style="text-align: center;">![The Microsoft Standard Azure Data Architecture Diagram](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Azure%20Diagram/2019-02-18%2020_13_23-Modern%20data%20warehouse.png?raw=true "Modern DW Diagram")
-The Modern Data Warehouse Architecture<br>
+When we talk about Azure architectures for data warehousing or analytics, we usually show a diagram that looks like the below.
+>*The Modern Data Warehouse Architecture<p style="text-align: center;">![The Microsoft Standard Azure Data Architecture Diagram](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Azure%20Diagram/2019-02-18%2020_13_23-Modern%20data%20warehouse.png?raw=true "Modern DW Diagram")
 [https://azure.microsoft.com/en-us/solutions/architecture/modern-data-warehouse/](https://azure.microsoft.com/en-us/solutions/architecture/modern-data-warehouse/)</p>*
 
 
