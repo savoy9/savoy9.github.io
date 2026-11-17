@@ -1,13 +1,22 @@
 ---
 layout: post
 title: Dax Aggregations Part 2 - Row Level Security with Delegate Access and DAX Aggregations
+permalink: /Dax-Aggregations-Part-2/
+date: 2019-02-19
+series_part: 2
+archived: true
+summary: Pairing manual aggregations with row level security, a sales hierarchy, and delegate access in the Wide World Importers model.
+topics: [Power BI, DAX, Row level security]
 ---
 
 Now that we’ve established the why and how of [Dax aggregations](https://savoy9.github.io/Dax-Aggregations/), let’s dive into applications. Specifically, how we might pair this with Row Level Security. Or at least how I *did* pair it with RLS. This post assumes you have read part 1. You have been warned.
 
 Let’s talk about World Wide Importer. Not the database, but the business. They sell stuff. From looking at the data,  it looks like they mostly sell coffee mugs to DBAs and Devs. Somehow, they employ over 100 salespeople in this endeavor. They also employ a bunch of people to move them around the warehouse. All of these employees are listed in our model in 'Dimension Employee'. 'Fact Sale' rows are related to salespeople, and other fact tables in the model are related to warehouse staff. However, 'Dimension Employee' doesn't mention anything about anyone managing these people. Never the less, this anarchical mug factory has generated appears to have $168 millon in sales.
 
-![WWI Top Products: Joke Mugs](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/WWI%20Cateloge.png?raw=true "Best Selling Products")
+<figure>
+  <img src="https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/WWI%20Cateloge.png?raw=true" alt="WWI Top Products: Joke Mugs" loading="lazy">
+  <figcaption>Best Selling Products</figcaption>
+</figure>
 
 Now that I'm in charge of this company, its time to impose some good old fashion capitalism.
 
@@ -34,7 +43,10 @@ To recap, we want to design a data model security scheme that protects the priva
 
 Where we're going we don't...have enoughh tables.
 
-![WWI Model improved with Org and Security Tables](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/RLS%20Example%20Model.png?raw=true "Improved Model")
+<figure>
+  <img src="https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/RLS%20Example%20Model.png?raw=true" alt="WWI Model improved with Org and Security Tables" loading="lazy">
+  <figcaption>Improved Model</figcaption>
+</figure>
 So. I've created more tables.
 
 1.	A leveled org table that relates Sales Managers to Employees. Manager(s) could also be dimensions of your employee table, but this depends on your Data Warehouse. I’m not modifying anything from the sample DW for my example, so we’ll just use an outrigger table  with a 1:1 relationship to Employee Key.
@@ -48,7 +60,16 @@ Thankfully, now that we’ve created a good data model, the DAX is very straight
 
 We can create a single role for all users with one simple DAX filter applied to the Security table to accomplish goals A-D above.
 
-><span class="Keyword" style="color:#0070FF">OR</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[AAD&nbsp;UPN]&nbsp;=&nbsp;<span class="Keyword" style="color:#0070FF">USERPRINCIPALNAME</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><span class="Parenthesis" style="color:#969696">)</span>,<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[AAD&nbsp;UPN]<br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>=&nbsp;<span class="Keyword" style="color:#0070FF">LOOKUPVALUE</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>'Delegate&nbsp;Table'[Delegate&nbsp;AAD&nbsp;UPN],<br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[AAD&nbsp;UPN],&nbsp;<span class="Keyword" style="color:#0070FF">USERPRINCIPALNAME</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="Parenthesis" style="color:#969696">)</span><br><span class="Parenthesis" style="color:#969696">)</span><br>![Daxformater.com Badge](https://www.daxformatter.com/wp-content/themes/daxformatter/images/daxformatter-embed.png "Daxformater.com")
+```dax
+OR (
+    [AAD UPN] = USERPRINCIPALNAME (),
+    [AAD UPN]
+        = LOOKUPVALUE (
+            'Delegate Table'[Delegate AAD UPN],
+            [AAD UPN], USERPRINCIPALNAME ()
+        )
+)
+```
 
 This will filter 'Fact Sale' down to rows where the user is listed in the security table, or where the person for whom they have delegate access is listed. Warehouse staff don’t appear in the fact table, so they don’t see anything. Ops staff have to be listed in the delegates table. That covers A-D. To accomplish E & F, we’re going to use a Manual Aggregation.
 
@@ -56,12 +77,45 @@ We never want to include a security table in the manual agg measure. This is bec
 
 To finish this off, all we need to do is set up our DAX Measures for Total Sales.
 
->Total&nbsp;Sales&nbsp;Detail&nbsp;:=<br><span class="Keyword" style="color:#0070FF">SUM</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Total&nbsp;Excluding&nbsp;Tax]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br>
+```dax
+Total Sales Detail :=
+SUM ( 'Fact Sale'[Total Excluding Tax] )
+```
 
->Total&nbsp;Sales&nbsp;Agg&nbsp;:=<br><span class="Keyword" style="color:#0070FF">SUM</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale&nbsp;Agg'[Total&nbsp;Excluding&nbsp;Tax]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br>
+```dax
+Total Sales Agg :=
+SUM ( 'Fact Sale Agg'[Total Excluding Tax] )
+```
 
->Total&nbsp;Sales&nbsp;:=<br><span class="Keyword" style="color:#0070FF">IF</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Is&nbsp;Salesperson]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;Org[Manager&nbsp;1]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;Org[Manager&nbsp;2]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;Org[Manager&nbsp;3]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;Org[Manager&nbsp;4]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;Org[Employee&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Date]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Calendar&nbsp;Month&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Calendar&nbsp;Year&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Fiscal&nbsp;Month&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Fiscal&nbsp;Year&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[ISO&nbsp;Week&nbsp;Number]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Month]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Short&nbsp;Month]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Day]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Description]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Package]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Salesperson&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Delivery&nbsp;Date&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span>,<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Total&nbsp;Sales&nbsp;Detail],<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Total&nbsp;Sales&nbsp;Agg]<br><span class="Parenthesis" style="color:#969696">)</span><br>
-![Daxformater.com Badge](https://www.daxformatter.com/wp-content/themes/daxformatter/images/daxformatter-embed.png "Daxformater.com")
+```dax
+Total Sales :=
+IF (
+    ISFILTERED ( 'Dimension Employee'[Employee] )
+        || ISFILTERED ( 'Dimension Employee'[Employee Key] )
+        || ISFILTERED ( 'Dimension Employee'[Employee] )
+        || ISFILTERED ( 'Dimension Employee'[Is Salesperson] )
+        || ISFILTERED ( Org[Manager 1] )
+        || ISFILTERED ( Org[Manager 2] )
+        || ISFILTERED ( Org[Manager 3] )
+        || ISFILTERED ( Org[Manager 4] )
+        || ISFILTERED ( Org[Employee Key] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Date] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Calendar Month Label] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Calendar Year Label] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Month Label] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Year Label] )
+        || ISFILTERED ( 'Dimension Invoice Date'[ISO Week Number] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Month] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Short Month] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Day] )
+        || ISFILTERED ( 'Fact Sale'[Description] )
+        || ISFILTERED ( 'Fact Sale'[Package] )
+        || ISFILTERED ( 'Fact Sale'[Salesperson Key] )
+        || ISFILTERED ( 'Fact Sale'[Delivery Date Key] ),
+    [Total Sales Detail],
+    [Total Sales Agg]
+)
+```
 
 Now we just hide everything but [Total Sales] so that all the user sees when using the model is that measure. Now they are seamlessly directed to the right granularity for their query and when they filter by the employee or org table, they only see the Sales rows that they are permissioned for. However, when they don't, they see complete and correct results.
 

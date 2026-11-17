@@ -1,18 +1,27 @@
-    <meta charset="utf-8" />
-    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
-
-    {% if page.excerpt %}
-    <meta name="description" content="{{ page.excerpt| strip_html }}" />
-    <meta property="og:description" content="{{ page.excerpt| strip_html }}" />
-    {% else %}
-    <meta name="description" content="{{ site.description }}">
-    <meta property="og:description" content="{{ site.description }}" />
-    {% endif %}
-    <meta name="author" content="{{ site.name }}" />
-
-    {% if page.title %}
-    <meta property="og:title" content="{{ page.title }}" />
-    <meta property="twitter:title" content="{{ page.title }}" />
-    {% endif %}
+{% assign description = page.description | default: page.summary | default: site.description %}
+{% assign social_image = page.image | default: site.image %}
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title %}{{ page.title | escape }} | {% endif %}{{ site.name | escape }}</title>
+<meta name="description" content="{{ description | strip_html | strip_newlines | escape }}">
+<meta name="author" content="{{ site.author | escape }}">
+<link rel="canonical" href="{{ page.url | absolute_url }}">
+<meta property="og:site_name" content="{{ site.name | escape }}">
+<meta property="og:title" content="{{ page.title | default: site.title | escape }}">
+<meta property="og:description" content="{{ description | strip_html | strip_newlines | escape }}">
+<meta property="og:url" content="{{ page.url | absolute_url }}">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="{{ social_image | absolute_url }}">
+<meta property="og:image:alt" content="Alex Dupler's technical field notebook: Power BI, DAX, and data modeling">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="{{ page.title | default: site.title | escape }}">
+<meta name="twitter:description" content="{{ description | strip_html | strip_newlines | escape }}">
+<meta name="twitter:image" content="{{ social_image | absolute_url }}">
+<meta name="twitter:image:alt" content="Alex Dupler's technical field notebook: Power BI, DAX, and data modeling">
+{% if page.layout == 'post' %}
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">
+{% else %}
+<meta property="og:type" content="website">
+{% endif %}
+{% if page.url == '/404.html' %}<meta name="robots" content="noindex">{% endif %}

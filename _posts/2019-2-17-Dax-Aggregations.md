@@ -1,9 +1,15 @@
 ---
 layout: post
 title: Dax Aggregations Part 1
+permalink: /Dax-Aggregations/
+date: 2019-02-17
+series_part: 1
+archived: true
+summary: Building aggregation logic with ISFILTERED, exploring granularity, and comparing query times with the built-in feature.
+topics: [Power BI, DAX, Aggregations]
 ---
-**Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so too](https://twitter.com/GuyInACube/status/1073693688155529216). The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already know about them, you should learn more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](http://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
-) [other](http://radacad.com/dual-storage-mode-the-most-important-configuration-for-aggregations-step-2-power-bi-aggregations) [places](radacad.com/power-bi-aggregations-step-3-configure-aggregation-functions-and-test-aggregations-in-action) first.
+**Aggregations** are one of my favorite new features added to Power BI in 2018. [Adam thinks so too](https://twitter.com/GuyInACube/status/1073693688155529216). The quick summary is that if you have two tables about the same facts at different levels of detail, Power BI can intelligently choose which one to use for each query to get the best performance. This article is about aggregations. If you don’t already know about them, you should learn more about them [here](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations) and [here](https://www.youtube.com/watch?v=RdHSo43LkQg) and [lots](https://radacad.com/power-bi-fast-and-furious-with-aggregations) [of](https://radacad.com/power-bi-aggregation-step-1-create-the-aggregated-table
+) [other](https://radacad.com/dual-storage-mode-the-most-important-configuration-for-aggregations-step-2-power-bi-aggregations) [places](https://radacad.com/power-bi-aggregations-step-3-configure-aggregation-functions-and-test-aggregations-in-action) first.
 
 This article isn’t about using Aggregations. It’s about how you can…not use them. I’m going to explain how to create “aggregations” without using the Aggregations feature.
 
@@ -21,10 +27,13 @@ Why
 I can think of four reasons to use this pattern.
 1. No plans have been announced for UI Aggregations to be available in Analysis Services.
 2. Currently, you cannot set up a [UI Aggregation over a table in Import storage mode](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations#validations).
-![No Aggs over Import Tables PBI Desktop Error Message](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/DQ%20Required.png?raw=true "DQ Required")
+<figure>
+  <img src="https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/DQ%20Required.png?raw=true" alt="No Aggs over Import Tables PBI Desktop Error Message" loading="lazy">
+  <figcaption>DQ Required</figcaption>
+</figure>
 
-1. Currently, you cannot use [row level security with UI Aggregations](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations#validations).
-2. Doing things you probably shouldn’t using [DAX is fun](https://twitter.com/philseamark?lang=en).
+3. Currently, you cannot use [row level security with UI Aggregations](https://docs.microsoft.com/en-us/power-bi/desktop-aggregations#validations).
+4. Doing things you probably shouldn’t using [DAX is fun](https://twitter.com/philseamark?lang=en).
 
 Reasons two and three should be addressed by the time the feature goes GA. And there are also no plans I've seen for Analysis Services to support Composite models, which really make aggregations shine.
 RLS is how I came upon this topic. I needed to secure different granularities differently. Which is a great capability and has nothing to do with something as amorphous as performance.
@@ -44,7 +53,10 @@ Just like a UI Aggregation, to set up a Dax Aggregation, you need a data model w
 
 For this example, we'll use the ‘Fact Sale’ table and all its related dimensions. I’ve also created  an aggregate table, ‘Fact Sale Agg’ that excludes Invoice Date, Delivery Customer (as distinct from Bill To Customer), and Employee ID as dimensions, as well as grouped away the row specific degenerate dimensions in fact table.
 
-![Relationship Diagram of Example Data Model](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/WWI%20Agg%20Model%20Example.png?raw=true "Relationship Diagram")
+<figure>
+  <img src="https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/WWI%20Agg%20Model%20Example.png?raw=true" alt="Relationship Diagram of Example Data Model" loading="lazy">
+  <figcaption>Relationship Diagram</figcaption>
+</figure>
 
 Now that we have a model to talk about, let's get back to what an Aggregation does. At the simplest level, it asks the following question: 
 *Does a given query include any columns that are below the granularity of the aggregated fact table*
@@ -54,8 +66,14 @@ The aggregation feature uses the information you provide in relationships and th
 
 Let's try to do that in DAX. For a single column, it might look like this:
 
->Dax&nbsp;Aggregation&nbsp;Measure&nbsp;:=<br><span class="Keyword" style="color:#0070FF">IF</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;table[Column]&nbsp;<span class="Parenthesis" style="color:#969696">)</span>,<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Detail&nbsp;Table&nbsp;Measure],<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Aggregated&nbsp;Table&nbsp;Measure]<br><span class="Parenthesis" style="color:#969696">)</span><br>
-![Daxformater.com Badge](https://www.daxformatter.com/wp-content/themes/daxformatter/images/daxformatter-embed.png "Daxformater.com")
+```dax
+Dax Aggregation Measure :=
+IF (
+    ISFILTERED ( table[Column] ),
+    [Detail Table Measure],
+    [Aggregated Table Measure]
+)
+```
 
 Thats easy enough. How would we expand this pattern to more columns? By using way too many OR() statements. Except, we don’t want to use [OR()](https://dax.guide/or/) because it only takes two arguments. Instead, we want to use the Or Operator, [\|\|](https://dax.guide/op/or/) because it expands to n arguments. And we're going to need n arguments.
 
@@ -64,13 +82,46 @@ Thats easy enough. How would we expand this pattern to more columns? By using wa
 
 As a result we need to list every single column that filters the detail table that we’ve excluded from Aggregate Table. Like this:
 
->Dax&nbsp;Aggregation&nbsp;Measure&nbsp;:=<br><span class="Keyword" style="color:#0070FF">IF</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'table&nbsp;1'[Column1]&nbsp;<span class="Parenthesis" style="color:#969696">)<br></span><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'table&nbsp;1'[Column&nbsp;2]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'table&nbsp;2'[Column&nbsp;3]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'table&nbsp;n'[Column&nbsp;m]&nbsp;<span class="Parenthesis" style="color:#969696">)</span>,<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Detail&nbsp;Table&nbsp;Measure],<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Aggregated&nbsp;Table&nbsp;Measure]<br><span class="Parenthesis" style="color:#969696">)</span><br> 
-![Daxformater.com Badge](https://www.daxformatter.com/wp-content/themes/daxformatter/images/daxformatter-embed.png "Daxformater.com")
+```dax
+Dax Aggregation Measure :=
+IF (
+    ISFILTERED ( 'table 1'[Column1] )
+        || ISFILTERED ( 'table 1'[Column 2] )
+        || ISFILTERED ( 'table 2'[Column 3] )
+        ...
+        || ISFILTERED ( 'table n'[Column m] ),
+    [Detail Table Measure],
+    [Aggregated Table Measure]
+)
+```
 
 Applied to our example model, this pattern becomes:
 
->Total&nbsp;Sales&nbsp;DAX&nbsp;Agg&nbsp;:=<br><span class="Keyword" style="color:#0070FF">IF</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span><br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Employee]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Is&nbsp;Salesperson]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Employee'[Preferred&nbsp;Name]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Date]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Calendar&nbsp;Month&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Calendar&nbsp;Year&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Fiscal&nbsp;Month&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Fiscal&nbsp;Year&nbsp;Label]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[ISO&nbsp;Week&nbsp;Number]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Month]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Short&nbsp;Month]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Dimension&nbsp;Invoice&nbsp;Date'[Day]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Description]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Package]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Salesperson&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span><br><span class="indent8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>||&nbsp;<span class="Keyword" style="color:#0070FF">ISFILTERED</span><span class="Parenthesis" style="color:#969696">&nbsp;(</span>&nbsp;'Fact&nbsp;Sale'[Delivery&nbsp;Date&nbsp;Key]&nbsp;<span class="Parenthesis" style="color:#969696">)</span>,<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Total&nbsp;Sales&nbsp;Detail],<br><span class="indent4">&nbsp;&nbsp;&nbsp;&nbsp;</span>[Total&nbsp;Sales&nbsp;Agg]<br><span class="Parenthesis" style="color:#969696">)</span><br>
-![Daxformater.com Badge](https://www.daxformatter.com/wp-content/themes/daxformatter/images/daxformatter-embed.png "Daxformater.com")
+```dax
+Total Sales DAX Agg :=
+IF (
+    ISFILTERED ( 'Dimension Employee'[Employee] )
+        || ISFILTERED ( 'Dimension Employee'[Employee Key] )
+        || ISFILTERED ( 'Dimension Employee'[Employee] )
+        || ISFILTERED ( 'Dimension Employee'[Is Salesperson] )
+        || ISFILTERED ( 'Dimension Employee'[Preferred Name] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Date] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Calendar Month Label] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Calendar Year Label] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Month Label] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Fiscal Year Label] )
+        || ISFILTERED ( 'Dimension Invoice Date'[ISO Week Number] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Month] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Short Month] )
+        || ISFILTERED ( 'Dimension Invoice Date'[Day] )
+        || ISFILTERED ( 'Fact Sale'[Description] )
+        || ISFILTERED ( 'Fact Sale'[Package] )
+        || ISFILTERED ( 'Fact Sale'[Salesperson Key] )
+        || ISFILTERED ( 'Fact Sale'[Delivery Date Key] ),
+    [Total Sales Detail],
+    [Total Sales Agg]
+)
+```
 
 What a mess of code. And that’s with a relatively small number of excluded dimensions.
 
@@ -89,7 +140,10 @@ Measuring performance is complicated. There are a lot variables that can change 
 
 For this article, I tested the query times of SUM('Fact Sale'[Total Excluding Tax]). I performed my test in three filter contexts and repeated the test 3 times. I only tested relationship-based UI aggregations and I didn’t test DQ for the Agg table. The direct query source was the [World Wide Importers DW](https://docs.microsoft.com/en-us/sql/samples/wide-world-importers-dw-install-configure?view=sql-server-2017) sample with the [Large Sale table](https://docs.microsoft.com/en-us/sql/samples/wide-world-importers-generate-data?view=sql-server-2017#generate-data-in-wideworldimportersdw-for-performance-testing) populated running on a dedicated [P1 Azure SQL DB](https://azure.microsoft.com/en-us/pricing/details/sql-database/single/) with no other users. The aggregated table had 27x fewer rows than the unaggregated table.  The employee row context is not included in the agg table granularity and so isn’t able to generate an agg hit. Complete results along with a copy of the .pbix are available on [my github](https://github.com/savoy9/AlexsPublicPowerBIStuff/tree/master/Manual%20Aggregations).
 
-![Testing Results Screenshot](https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/Testing%20Summary.png?raw=true "query response times in milliseconds")
+<figure>
+  <img src="https://github.com/savoy9/AlexsPublicPowerBIStuff/blob/master/Manual%20Aggregations/Testing%20Summary.png?raw=true" alt="Testing Results Screenshot" loading="lazy">
+  <figcaption>query response times in milliseconds</figcaption>
+</figure>
 - Both types of aggregations have an overhead over just querying an imported table. 
 - Both aggregation types are significantly faster than direct query against the large ‘Fact Sale’ table. 
 - Performance over an imported but unaggregated ‘Fact Sale’ was better but not wildly better. However, 12 million rows is a pedestrian fact table and a simple sum the simplest of measures. Increased complexity will probably favor the agg pattern.
@@ -104,6 +158,6 @@ As a result, I would recommend using this technique only if UI Aggregations are 
 
 Also, DAX is fun.
 
-**Part 2**, on applying RLS and this pattern together in the WWI sample model is coming soon.
+**[Part 2]({{ '/Dax-Aggregations-Part-2/' | relative_url }})** explores applying RLS and this pattern together in the WWI sample model.
 
 >Disclaimer: I work for Microsoft. More specifically, I work for Microsoft Advertising. We sell the ads that are served on Microsoft websites. Mostly Bing. Much to my chagrin, I don’t have any of that [sweet sweet inside information](https://twitter.com/GuyInACube/status/1073692665571655681) about Power BI. Views are my own.

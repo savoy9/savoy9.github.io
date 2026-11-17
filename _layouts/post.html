@@ -1,17 +1,37 @@
 ---
 layout: default
 ---
-
 <article class="post">
-  <h1>{{ page.title }}</h1>
-
-  <div class="entry">
-    {{ content }}
-  </div>
-
-  <div class="date">
-    Written on {{ page.date | date: "%B %e, %Y" }}
-  </div>
-
-  {% include disqus.html %}
+  <header class="article-header prose">
+    <p class="eyebrow">{% if page.series_part %}DAX aggregations / Part {{ page.series_part }}{% else %}Field notes{% endif %}</p>
+    <h1>{{ page.title }}</h1>
+    <p class="article-meta"><time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: "%B %-d, %Y" }}</time>{% if page.archived %} <span aria-hidden="true">/</span> Archive{% endif %}</p>
+    <ul class="topics" aria-label="Topics">{% for topic in page.topics %}<li>{{ topic }}</li>{% endfor %}</ul>
+    {% if page.archived %}
+    <aside class="archive-notice" aria-label="Archive notice">
+      <strong>From the 2019 notebook.</strong> These examples and product limitations describe Power BI at the time of writing. They have not been technically re-reviewed and may not reflect current behavior.
+    </aside>
+    {% endif %}
+    {% if page.series_part %}
+    <p class="sample-link"><a href="https://github.com/savoy9/AlexsPublicPowerBIStuff/tree/master/Manual%20Aggregations">Sample models and original test results on GitHub <span aria-hidden="true">&rarr;</span></a></p>
+    {% endif %}
+    {% if page.series_part == 1 %}
+    <nav class="contents" aria-label="In this article">
+      <strong>In this note</strong>
+      <a href="#why">Why</a><a href="#how">How</a><a href="#should">Should you?</a>
+    </nav>
+    {% endif %}
+  </header>
+  <div class="entry prose">{{ content }}</div>
+  {% if page.series_part %}
+  <nav class="series-nav prose" aria-label="DAX aggregations series">
+    {% if page.series_part == 1 %}
+    <span class="eyebrow">Keep reading / Part 2</span>
+    <a href="{{ '/Dax-Aggregations-Part-2/' | relative_url }}">Row level security with delegate access and DAX aggregations &rarr;</a>
+    {% else %}
+    <span class="eyebrow">Back to the beginning / Part 1</span>
+    <a href="{{ '/Dax-Aggregations/' | relative_url }}">&larr; DAX aggregations: why, how, and should you?</a>
+    {% endif %}
+  </nav>
+  {% endif %}
 </article>

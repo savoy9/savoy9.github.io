@@ -2,7 +2,10 @@
 layout: page
 title: About
 permalink: /about/
+description: Background and interests from Alex Dupler's original blog biography.
 ---
+
+<aside class="archive-notice" aria-label="Biography status"><strong>Original biography.</strong> This is the background published with the original blog, retained for context. Roles and time-sensitive details have not been updated.</aside>
 
 I'm a Business Analyst at Microsoft. I work in Field Sales Ops for [Microsoft Advertising](https://advertising.microsoft.com/home?s_cid=dig-src_uhfcons), a large sales force responsible for selling over [$7 billon](https://view.officeapps.live.com/op/view.aspx?src=https://c.s-microsoft.com/en-us/CMSFiles/MSFT_FY18Q4_10K.docx?version=b04fa6cd-ed0e-a4ea-6f4f-05c9f644b8a2) in advertisements, mostly search ads on Bing.
 
