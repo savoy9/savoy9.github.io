@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Alex Dupler's field notebook</title>
+  <desc id="desc">Power BI, DAX, and data modeling on off-white notebook paper.</desc>
+  <rect width="1200" height="630" fill="#f8f7f3"/>
+  <path d="M96 96v438M96 454h1008" stroke="#096777" stroke-width="4"/>
+  <text x="144" y="178" fill="#096777" font-family="monospace" font-size="24" letter-spacing="3">A TECHNICAL FIELD NOTEBOOK</text>
+  <text x="144" y="296" fill="#202b30" font-family="sans-serif" font-weight="700" font-size="76">Alex Dupler</text>
+  <text x="144" y="378" fill="#536368" font-family="sans-serif" font-size="36">Power BI. DAX. Data modeling.</text>
+  <text x="144" y="518" fill="#096777" font-family="monospace" font-size="24">savoy9.github.io</text>
+</svg>

@@ -1,18 +1,37 @@
 ---
 layout: default
+description: Notes and experiments on Power BI, DAX aggregations, data modeling, and row level security by Alex Dupler.
 ---
+<section class="intro prose" aria-labelledby="intro-title">
+  <p class="eyebrow">A technical field notebook</p>
+  <h1 id="intro-title">A little DAX.<br>A lot of curiosity.</h1>
+  <p>Notes from working through Power BI, data modeling, and the occasional thing you probably shouldn't do with DAX.</p>
+  <p class="intro-aside">Original experiments, useful detours, and code worth keeping.</p>
+</section>
 
-<div class="posts">
+<section class="featured" aria-labelledby="featured-title">
+  <div>
+    <p class="eyebrow">Start here / A two-part series</p>
+    <h2 id="featured-title">DAX aggregations</h2>
+    <p>What happens when you build your own aggregation logic? An experiment in granularity, performance, and row level security.</p>
+    <p class="small">Written in 2019. Preserved as an archive, not current product guidance.</p>
+  </div>
+  <ol class="series-list">
+    <li><span class="series-number" aria-hidden="true">01</span><a href="{{ '/Dax-Aggregations/' | relative_url }}">The why, the how, and the should you?<span>Manual aggregations with DAX &rarr;</span></a></li>
+    <li><span class="series-number" aria-hidden="true">02</span><a href="{{ '/Dax-Aggregations-Part-2/' | relative_url }}">Who gets to see what?<span>Row level security and delegate access &rarr;</span></a></li>
+  </ol>
+</section>
+
+<section class="writing" aria-labelledby="writing-title">
+  <div class="section-heading"><h2 id="writing-title">All writing</h2><a href="{{ '/feed.xml' | relative_url }}">Subscribe via Atom &rarr;</a></div>
   {% for post in site.posts %}
-    <article class="post">
-
-      <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
-
-      <div class="entry">
-        {{ post.excerpt }}
-      </div>
-
-      <a href="{{ site.baseurl }}{{ post.url }}" class="read-more">Read More</a>
-    </article>
+  <article class="post-summary">
+    <time datetime="{{ post.date | date: '%Y-%m-%d' }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+    <div>
+      <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+      <p>{{ post.summary }}</p>
+      <ul class="topics" aria-label="Topics">{% for topic in post.topics %}<li>{{ topic }}</li>{% endfor %}</ul>
+    </div>
+  </article>
   {% endfor %}
-</div>
+</section>
