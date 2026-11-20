@@ -66,6 +66,9 @@ button{font:inherit;font-size:.85rem;padding:5px 12px;border:1px solid #53677c;b
   .query-dialog[open][style]{top:var(--visible-top);bottom:auto;margin:0 auto;max-height:var(--visible-height)}
   .query-dialog pre{max-height:min(45vh,calc(var(--visible-height,100vh) * .5))}
 }
+@media (max-width:340px){
+  .compare>section{--timeline-width:40%}
+}
 </style></head><body><main><header><div><h1>AdventureWorks query timelines</h1>
 <p>December 2013 visual refresh · One measured run per design · Engine timings</p></div>
 <button id="replay" type="button" hidden>Replay</button></header>
