@@ -68,6 +68,16 @@ class SiteCheckTest < Minitest::Test
     assert_match(/Missing site directory/, checker.errors.first)
   end
 
+  def test_rejects_a_redirect_to_the_legacy_article_url
+    html = Nokogiri::HTML5(<<~HTML)
+      <link rel="canonical" href="https://savoy9.github.io/rayfin-performance-query-reduction/">
+      <meta http-equiv="refresh" content="0; url=/same-model-different-workload/">
+      <p><a href="/rayfin-performance-query-reduction/">Read the article</a></p>
+    HTML
+    @checker.check_query_reduction_redirect("/same-model-different-workload/", html)
+    assert_equal ["/same-model-different-workload/: incorrect redirect target"], @checker.errors
+  end
+
   def test_dax_highlighting_preserves_table_and_column_names_and_operators
     code = "IF ( ISFILTERED ( 'Fact Sale'[A]]B] ) || [Flag], SUM ( 'Fact Sale'[Total] ), 0 )"
     tokens = Rouge::Lexers::DAX.new.lex(code).to_a

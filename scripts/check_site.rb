@@ -4,11 +4,15 @@ require "uri"
 
 class SiteCheck
   ORIGIN = "https://savoy9.github.io"
+  QUERY_REDUCTION = "/rayfin-performance-query-reduction/"
+  OLD_QUERY_REDUCTION = "/same-model-different-workload/"
+  ARCHIVED = ["/Dax-Aggregations/", "/Dax-Aggregations-Part-2/"].freeze
   PUBLISHED = {
     "/" => nil,
     "/about/" => nil,
     "/Dax-Aggregations/" => "2019-02-17",
     "/Dax-Aggregations-Part-2/" => "2019-02-19",
+    QUERY_REDUCTION => "2026-11-20",
     "/404.html" => nil
   }.freeze
   DRAFT_NAMES = %w[
@@ -54,11 +58,14 @@ class SiteCheck
       document = document(file)
       expect(document.at_css(".article-meta time")&.[]("datetime") == date, route, "original publication date changed")
       expect(document.at_css('meta[property="article:published_time"]')&.[]("content")&.start_with?(date), route, "publication metadata changed")
+      next unless ARCHIVED.include?(route)
+
       expect(document.at_css(".archive-notice")&.text&.include?("not been technically re-reviewed"), route, "archive status missing")
       expect(document.css("pre code").any?, route, "DAX examples missing")
       expect(document.css("pre code .nf").any?, route, "DAX syntax highlighting missing")
       expect(document.at_css(".series-nav a"), route, "series navigation missing")
     end
+    expect(resolve(OLD_QUERY_REDUCTION), OLD_QUERY_REDUCTION, "legacy redirect missing")
     check_xml("sitemap.xml", "//xmlns:loc", "http://www.sitemaps.org/schemas/sitemap/0.9")
     check_xml("feed.xml", "//xmlns:link[@href]", "http://www.w3.org/2005/Atom", attribute: "href")
     errors
@@ -103,6 +110,7 @@ class SiteCheck
     check_content(route, doc, file)
     # Standalone interactive figures embedded by posts are not site pages.
     return if route.start_with?("/images/")
+    return check_query_reduction_redirect(route, doc) if route == OLD_QUERY_REDUCTION
 
     expect(doc.css("h1").size == 1, route, "expected exactly one H1")
     expect(doc.css("main#main").size == 1 && doc.at_css('a[href="#main"]'), route, "skip-link target missing")
@@ -119,10 +127,16 @@ class SiteCheck
     viewport = doc.at_css('meta[name="viewport"]')&.[]("content").to_s
     expect(!viewport.include?("maximum-scale") && !viewport.include?("user-scalable=no"), route, "zoom restricted")
     if route == "/"
-      PUBLISHED.keys.grep(/Dax/).each do |post|
+      PUBLISHED.select { |_, date| date }.each_key do |post|
         expect(doc.css("a").any? { |link| link["href"] == post }, route, "published article not discoverable: #{post}")
       end
     end
+  end
+
+  def check_query_reduction_redirect(route, doc)
+    expect(doc.at_css('link[rel="canonical"]')&.[]("href") == ORIGIN + QUERY_REDUCTION, route, "incorrect redirect canonical")
+    expect(doc.at_css('meta[http-equiv="refresh"]')&.[]("content") == "0; url=#{QUERY_REDUCTION}", route, "incorrect redirect target")
+    expect(doc.at_css("body a")&.[]("href") == QUERY_REDUCTION, route, "redirect fallback link missing")
   end
 
   def check_content(route, doc, file)
@@ -171,6 +185,7 @@ class SiteCheck
     nodes = xml.xpath(selector, "xmlns" => namespace)
     expect(!nodes.empty?, name, "no publication URLs found")
     urls = nodes.map { |node| attribute ? node[attribute] : node.text }
+    expect(!urls.include?(ORIGIN + OLD_QUERY_REDUCTION), name, "legacy redirect listed as published content")
     urls.each do |url|
       expect(url.start_with?(ORIGIN + "/"), name, "incorrect publication origin: #{url}")
       expect(!DRAFT_NAMES.any? { |draft| url.include?(draft) } && !url.include?("/drafts/") && !url.include?("/_drafts/"), name, "draft URL emitted")

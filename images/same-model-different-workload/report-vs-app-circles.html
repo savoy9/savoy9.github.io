@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Power BI report vs Fabric app</title>
 <style>
-  /* Preview-only page chrome: the blog's base tokens from style.scss. */
+  /* Match the blog's tokens inside the standalone iframe. */
   :root {
     color-scheme: light;
     --paper: #f8f7f3; --ink: #202b30; --muted: #536368; --accent: #096777; --line: #cdd5d3; --wash: #edf2ef;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--paper); color: var(--ink);
+  body { margin: 0; background: white; color: var(--ink);
     font: 1.125rem/1.75 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   .shell { max-width: 70rem; margin-inline: auto; padding-inline: 2.5rem; }
   :focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; border-radius: 2px; }
@@ -19,9 +19,8 @@
 
   /* ---------- The figure. Everything below is scoped to .dof-fig and reads the blog's tokens. ---------- */
   .dof-fig {
-    --report: #7a5b16; --engine: #536368;
-    max-width: 54rem; margin: 2rem auto; padding: 1.5rem 1.75rem 1.25rem;
-    background: var(--wash, #edf2ef); border-top: 3px solid var(--accent, #096777);
+    --report: #915015; --engine: var(--muted);
+    max-width: 54rem; margin: 0 auto; padding: 1rem 0 1.25rem;
   }
   .dof-fig svg { display: block; width: 100%; height: auto; overflow: visible; }
   .dof-fig svg text { fill: var(--ink); font-size: 13px; font-family: inherit; }
@@ -44,8 +43,9 @@
   .dof-fig svg .lock rect { fill: var(--engine); } .dof-fig svg .lock path { fill: none; }
   .dof-fig svg .lab.eng { fill: var(--muted); }
   .dof-fig svg.narrow .lab { font-size: 15px; } .dof-fig svg.narrow .ptitle { font-size: 14px; }
-  .dof-fig .dof-caption { min-height: 1.6em; margin: .75rem 0; font-size: 1rem; line-height: 1.6; }
-  .dof-fig .dof-controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+  .dof-fig .dof-caption { min-height: 1.6em; margin: .75rem 0; color: var(--muted); font-size: 1rem; line-height: 1.6; }
+  .dof-fig .dof-controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center;
+    padding-top: .75rem; border-top: 1px solid var(--line); }
   .dof-fig button { font: inherit; font-size: .9rem; color: var(--accent); background: var(--paper);
     border: 1px solid var(--line); padding: .4rem .7rem; border-radius: 3px; cursor: pointer; min-height: 2.75rem; }
   .dof-fig button:hover { border-color: var(--accent); }

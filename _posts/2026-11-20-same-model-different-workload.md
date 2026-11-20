@@ -3,6 +3,7 @@ layout: post
 title: "Fabric Apps and Performance Optimization"
 subtitle: "Part 1: Query Reduction"
 date: 2026-11-20
+permalink: /rayfin-performance-query-reduction/
 summary: Fabric apps can query the same semantic model as a Power BI report, so query reduction becomes a design choice.
 topics: [Fabric Apps, Power BI, Performance]
 ---
