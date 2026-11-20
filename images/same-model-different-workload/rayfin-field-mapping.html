@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From DAX field to chart bar: one Rayfin app's field mapping</title>
+<style>
+:root {
+  --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --line: #d1d9e0; --panel: #f6f8fa; --code: #f6f8fa;
+  --cat: #0a7c86; --cat-bg: #d8f3f5; --mea: #a3590b; --mea-bg: #fdebd3;
+  --rayfin: #6639ba; --app: #1a7f37; --lib: #0969da; --out: #59636e; --focus: #0969da;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --line: #30363d; --panel: #151b23; --code: #151b23;
+    --cat: #56d4dd; --cat-bg: #0f3a3e; --mea: #f0a24a; --mea-bg: #45290c;
+    --rayfin: #b39cf0; --app: #4ac26b; --lib: #4493f8; --out: #9198a1; --focus: #4493f8;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 1140px; margin: 0 auto; padding: 20px 16px 28px; }
+h1 { font-size: 1.25rem; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 14px; font-size: .9rem; }
+.chip { display: inline-block; font-size: .72rem; font-weight: 600; letter-spacing: .02em; padding: 1px 8px; border-radius: 999px; border: 1px solid currentColor; white-space: nowrap; }
+.own-rayfin { color: var(--rayfin); } .own-app { color: var(--app); } .own-lib { color: var(--lib); } .own-out { color: var(--out); }
+.f-cat { color: var(--cat); background: var(--cat-bg); border-radius: 3px; padding: 0 3px; font-weight: 600; }
+.f-mea { color: var(--mea); background: var(--mea-bg); border-radius: 3px; padding: 0 3px; font-weight: 600; }
+
+.steps { display: none; }
+.js .steps { display: flex; gap: 6px; margin: 0 0 12px; padding: 0; list-style: none; overflow-x: auto; scrollbar-width: thin; }
+.steps button {
+  font: inherit; font-size: .82rem; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 6px 10px; cursor: pointer; white-space: nowrap; display: flex; gap: 6px; align-items: center;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+.steps button .n { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--line); font-size: .72rem; font-weight: 700; }
+.steps button[aria-selected="true"] { border-color: var(--focus); background: var(--bg); box-shadow: inset 0 -2px 0 var(--focus); }
+.steps button[aria-selected="true"] .n { background: var(--focus); color: #fff; border-color: var(--focus); }
+button:focus-visible, a:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.panel { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin: 0 0 12px; background: var(--bg); }
+.js .panel { margin: 0; }
+.panel h2 { font-size: 1rem; margin: 0 0 2px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.panel p { margin: 8px 0 0; }
+.layout { display: grid; grid-template-columns: 296px minmax(0, 1fr); gap: 12px; align-items: start; }
+@media (max-width: 820px) { .layout { grid-template-columns: 1fr; } }
+.main { container-type: inline-size; min-width: 0; }
+.grid { display: grid; gap: 12px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+@container (max-width: 620px) { .grid { grid-template-columns: 1fr; } }
+
+.explorer { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 6px 0 8px; font: .78rem/1.2 system-ui, -apple-system, "Segoe UI", sans-serif; position: sticky; top: 8px; }
+@media (max-width: 820px) { .explorer { position: static; } }
+.explorer .hd { font-size: .66rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); padding: 2px 10px 6px; display: flex; justify-content: space-between; }
+.explorer ul { list-style: none; margin: 0; padding: 0; }
+.explorer .row { display: flex; align-items: center; gap: 5px; padding: 3px 8px 3px calc(8px + var(--d, 0) * 12px); white-space: nowrap; color: var(--fg); border-left: 2px solid transparent; }
+.explorer .tw { width: 10px; color: var(--muted); font-size: .7rem; text-align: center; flex: none; }
+.explorer .ic { flex: none; width: 24px; font: 700 .58rem/1 ui-monospace, Consolas, monospace; text-align: center; border-radius: 3px; padding: 2px 0; }
+.ic.dir { color: #c09553; font-size: .8rem; font-family: inherit; }
+.ic.dax { color: #a3590b; } .ic.ts { color: #3178c6; } .ic.json { color: #b58900; } .ic.yml { color: #cb171e; }
+@media (prefers-color-scheme: dark) { .ic.dax { color: #f0a24a; } .ic.ts { color: #4ea1ff; } .ic.json { color: #e2c08d; } .ic.yml { color: #ff7b72; } }
+.explorer .nm { overflow: hidden; text-overflow: ellipsis; }
+.explorer .badges { margin-left: auto; display: flex; gap: 2px; padding-left: 6px; }
+.explorer .badges b { font-size: .6rem; font-weight: 700; min-width: 14px; height: 14px; border-radius: 7px; display: inline-grid; place-items: center; color: var(--muted); border: 1px solid var(--line); }
+.explorer .file.used .nm { font-weight: 600; }
+.explorer button.row { font: inherit; background: none; border-top: 0; border-right: 0; border-bottom: 0; width: 100%; text-align: left; cursor: pointer; }
+.explorer button.row:hover { background: color-mix(in srgb, var(--focus) 8%, transparent); }
+.explorer .row.on { background: color-mix(in srgb, var(--focus) 18%, transparent); border-left-color: var(--focus); }
+.explorer .dir-row.on { background: none; border-left-color: transparent; }
+.explorer .dir-row.on .nm { font-weight: 700; color: var(--focus); }
+.explorer .row.on .badges b.cur { background: var(--focus); color: #fff; border-color: var(--focus); }
+pre { margin: 0; background: var(--code); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; overflow-x: auto; font: .78rem/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.dim { color: var(--muted); }
+.note { font-size: .86rem; }
+.note ul { margin: 6px 0 0; padding-left: 18px; }
+.note li { margin: 3px 0; }
+
+.chart { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.chart .t { font-weight: 600; font-size: .86rem; margin-bottom: 6px; }
+.bar-row { display: grid; grid-template-columns: 84px 1fr; align-items: center; gap: 8px; margin: 5px 0; font-size: .8rem; }
+.bar-row .lbl { text-align: right; padding: 0 3px; border-radius: 3px; }
+.bar { height: 16px; background: var(--lib); border-radius: 0 3px 3px 0; opacity: .55; position: relative; }
+.bar-row.hl .lbl { color: var(--cat); background: var(--cat-bg); font-weight: 700; }
+.bar-row.hl .bar { background: var(--mea); opacity: 1; }
+.tip { margin-top: 8px; font-size: .74rem; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; background: var(--bg); display: inline-block; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { border: 1px solid var(--line); border-radius: 8px; padding: 8px; background: var(--panel); }
+.kpi .k { font-size: .72rem; color: var(--muted); } .kpi .v { font-weight: 700; font-size: 1.05rem; }
+.kpi code { font-size: .7rem; }
+
+.nav { display: none; }
+.js .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: .82rem; color: var(--muted); }
+.nav button { font: inherit; font-size: .82rem; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 12px; cursor: pointer; }
+.nav button:disabled { opacity: .4; cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="walkthrough">
+  <h1>How one field reaches one bar</h1>
+  <p class="sub">Tracing the <span class="f-cat">Category</span> label and <span class="f-mea">Sales</span> measure through an example Rayfin project</p>
+
+  <ol class="steps" role="tablist" aria-label="Walkthrough steps">
+    <li role="presentation"><button role="tab" id="tab-1" aria-controls="step-1"><span class="n">1</span>DAX query</button></li>
+    <li role="presentation"><button role="tab" id="tab-2" aria-controls="step-2"><span class="n">2</span>Connector result</button></li>
+    <li role="presentation"><button role="tab" id="tab-3" aria-controls="step-3"><span class="n">3</span>Rename columns</button></li>
+    <li role="presentation"><button role="tab" id="tab-4" aria-controls="step-4"><span class="n">4</span>Chart spec</button></li>
+    <li role="presentation"><button role="tab" id="tab-5" aria-controls="step-5"><span class="n">5</span>Rendered bar</button></li>
+    <li role="presentation"><button role="tab" id="tab-6" aria-controls="step-6"><span class="n">6</span>KPI cards</button></li>
+  </ol>
+
+  <div class="layout">
+  <nav class="explorer" aria-label="App files used in each step">
+    <div class="hd"><span>EXPLORER</span></div>
+    <ul>
+      <li><div class="row dir-row" style="--d:0" data-dir><span class="tw">▾</span><span class="ic dir">▰</span><span class="nm">rayfin</span></div></li>
+      <li><button type="button" class="row file used" style="--d:1" data-steps="2" title="Declares the salesmodel connector and its executeQuery operation"><span class="tw"></span><span class="ic yml">YML</span><span class="nm">rayfin.yml</span><span class="badges"><b>2</b></span></button></li>
+      <li><div class="row dir-row" style="--d:0" data-dir><span class="tw">▾</span><span class="ic dir">▰</span><span class="nm">src</span></div></li>
+      <li><div class="row dir-row" style="--d:1" data-dir><span class="tw">▾</span><span class="ic dir">▰</span><span class="nm">components</span></div></li>
+      <li><button type="button" class="row file used" style="--d:2" data-steps="5 6" title="Breakdown and Kpis components"><span class="tw"></span><span class="ic ts">TSX</span><span class="nm">report-widgets.tsx</span><span class="badges"><b>5</b><b>6</b></span></button></li>
+      <li><div class="row dir-row" style="--d:1" data-dir><span class="tw">▾</span><span class="ic dir">▰</span><span class="nm">hooks</span></div></li>
+      <li><button type="button" class="row file used" style="--d:2" data-steps="2" title="Calls the connector's executeQuery"><span class="tw"></span><span class="ic ts">TS</span><span class="nm">use-semantic-model-query.ts</span><span class="badges"><b>2</b></span></button></li>
+      <li><div class="row dir-row" style="--d:1" data-dir><span class="tw">▾</span><span class="ic dir">▰</span><span class="nm">lib</span></div></li>
+      <li><button type="button" class="row file used" style="--d:2" data-steps="3" title="Runs the query, then calls toDataTable"><span class="tw"></span><span class="ic ts">TS</span><span class="nm">query-factory.ts</span><span class="badges"><b>3</b></span></button></li>
+      <li><button type="button" class="row file used" style="--d:2" data-steps="3" title="Applies column metadata to the connector table"><span class="tw"></span><span class="ic ts">TS</span><span class="nm">to-data-table.ts</span><span class="badges"><b>3</b></span></button></li>
+      <li><div class="row dir-row" style="--d:1" data-dir><span class="tw">▾</span><span class="ic dir">▰</span><span class="nm">queries</span></div></li>
+      <li><div class="row dir-row" style="--d:2" data-dir><span class="tw">▾</span><span class="ic dir">▰</span><span class="nm">overview</span></div></li>
+      <li><button type="button" class="row file used" style="--d:3" data-steps="1" title="Category breakdown DAX"><span class="tw"></span><span class="ic dax">DAX</span><span class="nm">categories.dax</span><span class="badges"><b>1</b></span></button></li>
+      <li><button type="button" class="row file used" style="--d:3" data-steps="4" title="Vega-Lite spec for the category bar chart"><span class="tw"></span><span class="ic json">{}</span><span class="nm">categories.json</span><span class="badges"><b>4</b></span></button></li>
+      <li><button type="button" class="row file used" style="--d:3" data-steps="3 6" title="Query factories and column metadata"><span class="tw"></span><span class="ic ts">TS</span><span class="nm">index.ts</span><span class="badges"><b>3</b><b>6</b></span></button></li>
+      <li><button type="button" class="row file used" style="--d:3" data-steps="6" title="Single-row KPI DAX"><span class="tw"></span><span class="ic dax">DAX</span><span class="nm">kpis.dax</span><span class="badges"><b>6</b></span></button></li>
+    </ul>
+  </nav>
+  <div class="main">
+  <section class="panel" id="step-1" role="tabpanel" aria-labelledby="tab-1" tabindex="0">
+    <h2>1 · The app authors the DAX <span class="chip own-app">App code</span></h2>
+    <div class="grid">
+<pre>EVALUATE
+SUMMARIZECOLUMNS(
+    <span class="f-cat">'DimProductCategory'[EnglishProductCategoryName]</span>,
+    <span class="dim">/*__FILTER_ARGUMENTS__*/</span>
+    <span class="f-mea">"Sales"</span>, [Total Sales],
+    "Orders", [Order Count],
+    "Margin", [Gross Margin]
+)
+ORDER BY [Sales] DESC, ...</pre>
+      <div class="note">
+        <p>The grouping column becomes one row per category. <span class="f-mea">"Sales"</span> is an alias the author picks for the <code>[Total Sales]</code> measure.</p>
+        <p>The marker comment is where the app's own code inserts slicer and cross-filter arguments before sending.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="step-2" role="tabpanel" aria-labelledby="tab-2" tabindex="0">
+    <h2>2 · Rayfin returns a plain table <span class="chip own-rayfin">Rayfin connector</span></h2>
+    <div class="grid">
+<pre>{ status: "success",
+  table: {
+    columns: [
+      { name: "<span class="f-cat">DimProductCategory[EnglishProductCategoryName]</span>" },
+      { name: "<span class="f-mea">[Sales]</span>" },
+      { name: "[Orders]" }, { name: "[Margin]" }
+    ],
+    rows: [
+      [ <span class="f-cat">"Bikes"</span>, <span class="f-mea">1773771.81</span>, 1135, 0.407 ],
+      [ "Accessories", 65783.35, 1737, 0.626 ],
+      [ "Clothing",    34805.13,  770, 0.395 ]
+    ] } }</pre>
+      <div class="note">
+        <p>The connector's job ends here: column names as the engine reports them, plus rows as arrays aligned to <code>columns</code>.</p>
+        <ul>
+          <li>Grouping column: <code>Table[Column]</code></li>
+          <li>Measure alias: <code>[Alias]</code></li>
+          <li>No chart roles, display names, or formats yet</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="step-3" role="tabpanel" aria-labelledby="tab-3" tabindex="0">
+    <h2>3 · The app renames and labels columns <span class="chip own-app">App code</span></h2>
+    <div class="grid">
+<pre>columnMetadata: {
+  "<span class="f-cat">DimProductCategory[EnglishProductCategoryName]</span>":
+      { name: "<span class="f-cat">Category</span>", displayName: "Category" },
+  "<span class="f-mea">[Sales]</span>":
+      { name: "<span class="f-mea">Sales</span>", displayName: "Net sales",
+        format: "$#,0.00;($#,0.00);$0.00" },
+  ...
+}
+<span class="dim">// toDataTable: columns.map(c =&gt; columnMetadata[c.name] ?? { name: c.name })
+// rows pass through unchanged</span></pre>
+      <div class="note">
+        <p>A lookup keyed by the exact returned name swaps in a short field name, a display name and a format string. Row values are not touched.</p>
+        <p>If a key doesn't match, the raw name passes through and the app's helpers that look up <code>Category</code> throw a missing-column error rather than guess.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="step-4" role="tabpanel" aria-labelledby="tab-4" tabindex="0">
+    <h2>4 · A Vega-Lite spec names the fields <span class="chip own-app">App code</span></h2>
+    <div class="grid">
+<pre>"mark": { "type": "bar" },
+"encoding": {
+  "y": { "field": "<span class="f-cat">Category</span>", "type": "nominal",
+         "sort": "-x" },
+  "x": { "field": "<span class="f-mea">Sales</span>", "type": "quantitative" },
+  "tooltip": [
+    { "field": "<span class="f-cat">Category</span>" },
+    { "field": "<span class="f-mea">Sales</span>", "title": "Net sales",
+      "format": ",.2f" }, ...
+  ] }</pre>
+      <div class="note">
+        <p>The binding is by name, written by hand: the spec refers to the renamed fields from step 3. Nothing infers that categories go on an axis.</p>
+        <p>The sort, axis titles and tooltip formatting are also authored here.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="step-5" role="tabpanel" aria-labelledby="tab-5" tabindex="0">
+    <h2>5 · React renders the visual <span class="chip own-app">App code</span> <span class="chip own-lib">Visual library</span></h2>
+    <div class="grid">
+      <div class="chart" role="img" aria-label="Bar chart: Bikes 1.77 million, Accessories 65.8 thousand, Clothing 34.8 thousand net sales. Bikes is highlighted.">
+        <div class="t">What · Product category</div>
+        <div class="bar-row hl"><span class="lbl">Bikes</span><span class="bar" style="width:100%"></span></div>
+        <div class="bar-row"><span class="lbl">Accessories</span><span class="bar" style="width:3.71%"></span></div>
+        <div class="bar-row"><span class="lbl">Clothing</span><span class="bar" style="width:1.96%"></span></div>
+        <div class="tip"><span class="f-cat">Category</span> Bikes · <span class="f-mea">Net sales</span> 1,773,771.81</div>
+      </div>
+      <div class="note">
+        <p>The app's React component passes the table and spec to <code>VegaVisual</code>, which turns each row into a datum keyed by field name, so <span class="f-cat">"Bikes"</span> becomes a y-axis label and <span class="f-mea">1773771.81</span> sets the bar length.</p>
+        <p>The header text, the empty-state check, and the click and right-click wiring are app code around the visual.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="step-6" role="tabpanel" aria-labelledby="tab-6" tabindex="0">
+    <h2>6 · Same mechanics, one row, four cards <span class="chip own-app">App code</span> <span class="chip own-lib">Visual library</span></h2>
+    <div class="grid">
+<pre>ROW( "<span class="f-mea">Sales</span>", [Total Sales],
+     "Margin", [Gross Margin],
+     "Orders", [Order Count],
+     "AOV", [AOV], ... )   <span class="dim">// 14 aliases</span>
+
+<span class="dim">// connector → "[Sales]", toDataTable → "Sales"</span>
+cards.map(card =&gt; &lt;KpiCard
+  value={metric(table, card.name)} /&gt;)</pre>
+      <div>
+        <div class="kpis" aria-label="Four KPI cards fed by one query">
+          <div class="kpi"><div class="k">Net sales</div><div class="v"><span class="f-mea">$1.9M</span></div><code>Sales</code></div>
+          <div class="kpi"><div class="k">Gross margin</div><div class="v">41.4%</div><code>Margin</code></div>
+          <div class="kpi"><div class="k">Orders</div><div class="v">2,192</div><code>Orders</code></div>
+          <div class="kpi"><div class="k">Avg order value</div><div class="v">$855.09</div><code>AOV</code></div>
+        </div>
+        <p class="note">One query, one returned row. The app picks values by name for each card; comparison text such as <code>SalesCompare</code> ("+5.2% vs Nov 2013") comes from the same row.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="nav" aria-hidden="false">
+    <button type="button" id="prev">← Previous</button>
+    <span id="pos" aria-live="polite"></span>
+    <button type="button" id="next">Next →</button>
+  </div>
+  </div>
+  </div>
+</div>
+<script>
+(function () {
+  var root = document.getElementById("walkthrough");
+  root.classList.add("js");
+  var tabs = Array.prototype.slice.call(root.querySelectorAll('[role="tab"]'));
+  var panels = tabs.map(function (t) { return document.getElementById(t.getAttribute("aria-controls")); });
+  var prev = document.getElementById("prev"), next = document.getElementById("next"), pos = document.getElementById("pos");
+  var current = 0;
+  var rows = Array.prototype.slice.call(root.querySelectorAll(".explorer .row"));
+  var depth = function (r) { return +r.style.getPropertyValue("--d"); };
+  var files = rows.filter(function (r) { return r.hasAttribute("data-steps"); }).map(function (r) {
+    var anc = [], d = depth(r), idx = rows.indexOf(r);
+    for (var k = idx - 1; k >= 0 && d > 0; k--) {
+      if (rows[k].hasAttribute("data-dir") && depth(rows[k]) < d) { anc.push(rows[k]); d = depth(rows[k]); }
+    }
+    return { el: r, steps: r.getAttribute("data-steps").split(" ").map(Number), anc: anc };
+  });
+  function highlight() {
+    var n = current + 1;
+    rows.forEach(function (r) { r.classList.remove("on"); });
+    files.forEach(function (f) {
+      var on = f.steps.indexOf(n) >= 0;
+      f.el.setAttribute("aria-current", on ? "true" : "false");
+      Array.prototype.forEach.call(f.el.querySelectorAll(".badges b"), function (b) { b.classList.toggle("cur", +b.textContent === n); });
+      if (on) { f.el.classList.add("on"); f.anc.forEach(function (a) { a.classList.add("on"); }); }
+    });
+  }
+  files.forEach(function (f) {
+    f.el.addEventListener("click", function () {
+      var i = f.steps.indexOf(current + 1);
+      show((i >= 0 ? f.steps[(i + 1) % f.steps.length] : f.steps[0]) - 1, false);
+    });
+  });
+  function show(i, focus) {
+    current = Math.max(0, Math.min(tabs.length - 1, i));
+    tabs.forEach(function (t, k) {
+      var on = k === current;
+      t.setAttribute("aria-selected", on ? "true" : "false");
+      t.tabIndex = on ? 0 : -1;
+      panels[k].hidden = !on;
+    });
+    prev.disabled = current === 0;
+    next.disabled = current === tabs.length - 1;
+    pos.textContent = "Step " + (current + 1) + " of " + tabs.length;
+    highlight();
+    if (focus) tabs[current].focus({ preventScroll: true });
+    // Scroll only the step strip; scrollIntoView would also scroll the embedding page.
+    var strip = root.querySelector(".steps"), sr = strip.getBoundingClientRect(), tr = tabs[current].getBoundingClientRect();
+    if (tr.left < sr.left) strip.scrollLeft -= sr.left - tr.left;
+    else if (tr.right > sr.right) strip.scrollLeft += tr.right - sr.right;
+  }
+  tabs.forEach(function (t, k) {
+    t.addEventListener("click", function () { show(k, false); });
+    t.addEventListener("keydown", function (e) {
+      var map = { ArrowRight: current + 1, ArrowDown: current + 1, ArrowLeft: current - 1, ArrowUp: current - 1, Home: 0, End: tabs.length - 1 };
+      if (e.key in map) { e.preventDefault(); show(map[e.key], true); }
+    });
+  });
+  prev.addEventListener("click", function () { show(current - 1, false); });
+  next.addEventListener("click", function () { show(current + 1, false); });
+  show(0, false);
+})();
+</script>
+</body>
+</html>

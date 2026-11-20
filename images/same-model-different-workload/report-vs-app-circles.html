@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Power BI report vs Fabric app</title>
+<style>
+  /* Preview-only page chrome: the blog's base tokens from style.scss. */
+  :root {
+    color-scheme: light;
+    --paper: #f8f7f3; --ink: #202b30; --muted: #536368; --accent: #096777; --line: #cdd5d3; --wash: #edf2ef;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+    font: 1.125rem/1.75 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .shell { max-width: 70rem; margin-inline: auto; padding-inline: 2.5rem; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; border-radius: 2px; }
+  @media (max-width: 42rem) { body { font-size: 1rem; } .shell { padding-inline: 1.25rem; } }
+
+  /* ---------- The figure. Everything below is scoped to .dof-fig and reads the blog's tokens. ---------- */
+  .dof-fig {
+    --report: #7a5b16; --engine: #536368;
+    max-width: 54rem; margin: 2rem auto; padding: 1.5rem 1.75rem 1.25rem;
+    background: var(--wash, #edf2ef); border-top: 3px solid var(--accent, #096777);
+  }
+  .dof-fig svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .dof-fig svg text { fill: var(--ink); font-size: 13px; font-family: inherit; }
+  .dof-fig svg .ptitle { font: 600 12px ui-monospace, SFMono-Regular, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; }
+  .dof-fig svg .ptitle.rep { fill: var(--report); } .dof-fig svg .ptitle.app { fill: var(--accent); }
+  .dof-fig svg .rule { stroke: var(--line); stroke-width: 1; }
+  .dof-fig svg .cir { fill: none; stroke-width: 1.2; opacity: .7; }
+  .dof-fig svg .cir.eng { stroke: var(--engine); stroke-dasharray: 3 3; opacity: .55; }
+  .dof-fig svg .cir.rep { stroke: var(--report); } .dof-fig svg .cir.app { stroke: var(--accent); }
+  .dof-fig svg .arm { stroke: var(--ink); stroke-width: 1; opacity: .45; }
+  .dof-fig svg .pen.rep { fill: var(--report); } .dof-fig svg .pen.app { fill: var(--accent); }
+  .dof-fig svg .trail { fill: none; stroke-width: 3; stroke-linecap: round; }
+  .dof-fig svg .trail.rep { stroke: var(--report); } .dof-fig svg .trail.app { stroke: var(--accent); }
+  .dof-fig svg .tgt { fill: none; stroke: var(--ink); stroke-width: 1.4; stroke-dasharray: 6 5; opacity: .4; }
+  .dof-fig svg .track { fill: var(--paper); stroke: var(--line); }
+  .dof-fig svg .rbar.eng { fill: var(--engine); opacity: .45; }
+  .dof-fig svg .rbar.rep { fill: var(--report); } .dof-fig svg .rbar.app { fill: var(--accent); }
+  .dof-fig svg .tick { stroke: var(--ink); stroke-width: 2; }
+  .dof-fig svg .lock rect, .dof-fig svg .lock path { stroke: var(--engine); }
+  .dof-fig svg .lock rect { fill: var(--engine); } .dof-fig svg .lock path { fill: none; }
+  .dof-fig svg .lab.eng { fill: var(--muted); }
+  .dof-fig svg.narrow .lab { font-size: 15px; } .dof-fig svg.narrow .ptitle { font-size: 14px; }
+  .dof-fig .dof-caption { min-height: 1.6em; margin: .75rem 0; font-size: 1rem; line-height: 1.6; }
+  .dof-fig .dof-controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+  .dof-fig button { font: inherit; font-size: .9rem; color: var(--accent); background: var(--paper);
+    border: 1px solid var(--line); padding: .4rem .7rem; border-radius: 3px; cursor: pointer; min-height: 2.75rem; }
+  .dof-fig button:hover { border-color: var(--accent); }
+  .dof-fig .dof-scrub { flex: 1 1 10rem; min-width: 8rem; accent-color: var(--accent); min-height: 2.75rem; }
+  .dof-fig .dof-parts { display: flex; gap: .35rem; }
+  .dof-fig .dof-parts button { min-width: 2.75rem; padding-inline: 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+  .dof-fig .dof-parts button[aria-current="step"] { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+    font: .75rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+  @media (max-width: 42rem) { .dof-fig .dof-caption { min-height: 3.2em; } .dof-fig { padding: 1.25rem 1rem 1rem; margin-inline: -1.25rem; } }
+</style>
+</head>
+<body>
+<main class="shell">
+  <figure class="dof-fig" id="dof-circles" aria-label="Design choices as spinning circles: Power BI report vs Fabric app">
+    <svg role="img" aria-labelledby="dof-alt"><desc id="dof-alt">Two spinning-circle drawings side by
+      side on one clock. Left, a Power BI report: the author sizes the data model and visuals circles, and six
+      locked circles stay where the engine put them, so the pen misses the dashed target. Right, a Fabric app: the
+      author sizes all eight circles and follows the target, then shrinks seven of them together while the data
+      model circle stays the same, then oversizes two and recovers.</desc></svg>
+    <p class="dof-caption" aria-live="polite"></p>
+    <div class="dof-controls"></div>
+  </figure>
+</main>
+
+<script>
+(() => {
+  "use strict";
+  const fig = document.getElementById("dof-circles");
+  if (!fig) return;
+  const NS = "http://www.w3.org/2000/svg", TAU = 2 * Math.PI;
+  const svg = fig.querySelector("svg"), cap = fig.querySelector(".dof-caption"), bar = fig.querySelector(".dof-controls");
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const desc = svg.querySelector("desc");
+
+  function el(tag, attrs, parent, text) {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (text !== undefined) n.textContent = text;
+    if (parent) parent.appendChild(n);
+    return n;
+  }
+  const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+  // r: size the page needs; e: engine-chosen size in the report. Sizes are illustrative.
+  const EPI = [
+    { n: "Data model", r: 60, f: 1, p: 0 },
+    { n: "Visuals", r: 14, f: -2, p: .3 },
+    { n: "Query text", r: 12, f: -1, p: 2.2, e: 2 },
+    { n: "Query mapping", r: 10, f: 2, p: .9, e: 22 },
+    { n: "Sources", r: 6, f: 3, p: 4.1, e: 0 },
+    { n: "Compute location", r: 6, f: -3, p: 5.0, e: 16 },
+    { n: "Caching", r: 4, f: 4, p: 1.7, e: 12 },
+    { n: "Backend", r: 3, f: 5, p: 2.9, e: 1 },
+  ];
+  const DUR = 15.6, PERIOD = 4;
+  const PARTS = [
+    { t: 0, c: "Each circle is a design choice. Spinning together, they draw the result." },
+    { t: .077, c: "A report sets two circles; the engine sets the rest. An app sets all eight." },
+    { t: .308, c: "On the same data model, the app tunes the other seven: same shape, less work." },
+    { t: .615, c: "Every circle you can set, you can set wrong." },
+    { t: .815, c: "More circles: more shapes in reach, more ways to miss." },
+  ];
+  const shrink = f => 1 - .45 * smooth(.338, .538, f);
+  const wrong = f => 1 + 1.6 * (smooth(.646, .723, f) - smooth(.831, .908, f));
+  const reportRs = () => EPI.map((c, k) => k < 2 ? c.r : c.e);
+  // The data model is shared by both sides, so it never shrinks or goes wrong.
+  const appRs = f => EPI.map((c, k) => c.r * (k ? shrink(f) : 1) * (k === 2 || k === 3 ? wrong(f) : 1));
+  const targetRs = f => EPI.map((c, k) => k ? c.r * shrink(f) : c.r);
+
+  // Panels sit side by side when there is room; on narrow screens they stack so text stays readable.
+  const K = 1.15, BK = 1.5, PW = 380, PH = 470;
+  function build(narrow) {
+    svg.textContent = "";
+    svg.appendChild(desc);
+    svg.classList.toggle("narrow", narrow);
+    svg.setAttribute("viewBox", narrow ? `0 0 ${PW} ${2 * PH}` : `0 0 ${2 * PW} ${PH}`);
+    if (narrow) el("line", { x1: 10, x2: PW - 10, y1: PH - 4, y2: PH - 4, class: "rule" }, svg);
+    else el("line", { x1: PW, x2: PW, y1: 0, y2: PH - 10, class: "rule" }, svg);
+    const panel = (X, Y, title, side, mine) => {
+      const CX = X + PW / 2, CY = Y + 165;
+      const curve = (rs, th) => EPI.reduce((z, c, k) => {
+        const a = c.f * th + c.p; return [z[0] + K * rs[k] * Math.cos(a), z[1] + K * rs[k] * Math.sin(a)];
+      }, [CX, CY]);
+      el("text", { x: CX, y: Y + 18, "text-anchor": "middle", class: "ptitle " + side }, svg, title);
+      const tgt = el("polyline", { class: "tgt" }, svg);
+      const trail = Array.from({ length: 10 }, (_, j) => el("polyline", { class: "trail " + side, opacity: ((j + 1) / 10).toFixed(2) }, svg));
+      const circ = EPI.map((_, k) => el("circle", { class: "cir " + (mine(k) ? side : "eng") }, svg));
+      const arms = EPI.map(() => el("line", { class: "arm" }, svg));
+      const pen = el("circle", { r: 4, class: "pen " + side }, svg);
+      const BX = X + (narrow ? 178 : 165);
+      const rows = EPI.map((c, k) => {
+        const y = Y + 320 + k * 18, own = mine(k);
+        el("text", { x: X + 40, y: y + 4.5, class: "lab " + (own ? "" : "eng") }, svg, c.n);
+        if (!own) {
+          const g = el("g", { class: "lock", transform: `translate(${X + 27} ${y + 1}) scale(.62)` }, svg);
+          el("rect", { x: -8, y: -5, width: 16, height: 12, rx: 2 }, g);
+          el("path", { d: "M-5,-5 v-4 a5,5 0 0 1 10,0 v4", "stroke-width": 2 }, g);
+        }
+        el("rect", { x: BX, y: y - 6, width: 190, height: 12, class: "track" }, svg);
+        const b = el("rect", { x: BX, y: y - 4, height: 8, class: "rbar " + (own ? side : "eng") }, svg);
+        const tick = el("line", { y1: y - 8, y2: y + 8, class: "tick" }, svg);
+        return { b, tick };
+      });
+      return (rs, tRs, th) => {
+        tgt.setAttribute("points", Array.from({ length: 241 }, (_, j) => curve(tRs, TAU * j / 240).map(v => v.toFixed(1)).join(",")).join(" "));
+        let x = CX, y = CY;
+        EPI.forEach((c, k) => {
+          const r = K * rs[k], a = c.f * th + c.p, nx = x + r * Math.cos(a), ny = y + r * Math.sin(a);
+          circ[k].setAttribute("cx", x.toFixed(1)); circ[k].setAttribute("cy", y.toFixed(1)); circ[k].setAttribute("r", r.toFixed(1));
+          arms[k].setAttribute("x1", x.toFixed(1)); arms[k].setAttribute("y1", y.toFixed(1));
+          arms[k].setAttribute("x2", nx.toFixed(1)); arms[k].setAttribute("y2", ny.toFixed(1));
+          rows[k].b.setAttribute("width", (rs[k] * BK).toFixed(1));
+          const tx = (BX + tRs[k] * BK).toFixed(1);
+          rows[k].tick.setAttribute("x1", tx); rows[k].tick.setAttribute("x2", tx);
+          x = nx; y = ny;
+        });
+        pen.setAttribute("cx", x.toFixed(1)); pen.setAttribute("cy", y.toFixed(1));
+        const span = .92 * TAU, n = trail.length;
+        trail.forEach((pl, j) => {
+          const a0 = th - span * (1 - j / n), a1 = th - span * (1 - (j + 1) / n);
+          pl.setAttribute("points", Array.from({ length: 15 }, (_, m) => curve(rs, a0 + (a1 - a0) * m / 14).map(v => v.toFixed(1)).join(",")).join(" "));
+        });
+      };
+    };
+    const left = panel(0, 0, "Power BI report", "rep", k => k < 2);
+    const right = narrow ? panel(0, PH, "Fabric app", "app", () => true) : panel(PW, 0, "Fabric app", "app", () => true);
+    const fixed = EPI.map(c => c.r);
+    return (f, tau) => {
+      const th = TAU * tau / PERIOD;
+      left(reportRs(), fixed, th);
+      right(appRs(f), targetRs(f), th);
+    };
+  }
+
+  // One clock for both panels. After the last part the circles keep spinning until paused.
+  let f = 0, over = 0, playing = false, raf = 0, last = 0, ph = -1, narrow = null, draw = null;
+  const mk = (label, aria, fn, parent) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = label; b.setAttribute("aria-label", aria);
+    b.addEventListener("click", fn); (parent || bar).appendChild(b); return b;
+  };
+  mk("↺ Replay", "Replay from the start", () => play(true));
+  const playBtn = mk("▶ Play", "Play", () => playing ? pause() : play(false));
+  const range = document.createElement("input");
+  Object.assign(range, { type: "range", min: 0, max: 1000, value: 0, className: "dof-scrub" });
+  range.setAttribute("aria-label", "Scrub through the animation");
+  range.addEventListener("input", () => { pause(); f = range.value / 1000; over = 0; render(); });
+  bar.appendChild(range);
+  const parts = document.createElement("div"); parts.className = "dof-parts"; bar.appendChild(parts);
+  const partBtns = PARTS.map((_, i) => mk(String(i + 1), "Jump to part " + (i + 1), () => { pause(); go(i); }, parts));
+
+  function render() {
+    draw(f, f * DUR + over);
+    let i = 0; PARTS.forEach((p, j) => { if (f >= p.t) i = j; });
+    if (i !== ph) {
+      ph = i; cap.textContent = PARTS[i].c;
+      partBtns.forEach((b, j) => b.setAttribute("aria-current", j === i ? "step" : "false"));
+    }
+    range.value = Math.round(f * 1000);
+  }
+  function tick(now) {
+    if (!playing) return;
+    const dt = Math.min(.1, (now - last) / 1000); last = now;
+    if (f >= 1) over += dt; else f = Math.min(1, f + dt / DUR);
+    render(); raf = requestAnimationFrame(tick);
+  }
+  function play(restart) {
+    if (restart) { f = 0; over = 0; }
+    playing = true; playBtn.textContent = "❚❚ Pause"; playBtn.setAttribute("aria-label", "Pause");
+    cancelAnimationFrame(raf); last = performance.now(); render(); raf = requestAnimationFrame(tick);
+  }
+  function pause() {
+    playing = false; cancelAnimationFrame(raf);
+    playBtn.textContent = "▶ Play"; playBtn.setAttribute("aria-label", "Play");
+  }
+  // Jumping to a part shows its settled state, just before the next part begins.
+  function go(i) { f = i < PARTS.length - 1 ? PARTS[i + 1].t - .004 : 1; over = 0; render(); }
+
+  function layout() {
+    const n = fig.clientWidth < 600;
+    if (n === narrow) return;
+    narrow = n; draw = build(n); render();
+  }
+  layout();
+  if ("ResizeObserver" in window) new ResizeObserver(layout).observe(fig);
+  else window.addEventListener("resize", layout);
+
+  // ?t=0..1 renders a still frame at that point (used for static captures).
+  const qt = new URLSearchParams(location.search).get("t");
+  if (qt !== null) { f = Math.min(1, Math.max(0, +qt)); render(); return; }
+  // With reduced motion nothing autoplays; the figure opens on the side-by-side comparison instead.
+  if (reduce.matches) { go(1); return; }
+  reduce.addEventListener?.("change", e => { if (e.matches) pause(); });
+  if ("IntersectionObserver" in window) {
+    let started = false;
+    new IntersectionObserver((es, io) => es.forEach(e => {
+      if (e.isIntersecting && !started && !reduce.matches) { started = true; io.disconnect(); play(true); }
+    }), { rootMargin: "0px 0px -30% 0px" }).observe(fig);
+  } else play(true);
+})();
+</script>
+</body>
+</html>

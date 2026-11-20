@@ -1,3 +1,23 @@
+document.querySelectorAll("iframe[data-autosize]").forEach((frame) => {
+  const fit = () => {
+    try {
+      const doc = frame.contentDocument;
+      if (!doc || !doc.documentElement) return;
+      const previous = frame.style.height;
+      frame.style.height = "0px";
+      const height = doc.documentElement.scrollHeight + 4 + "px";
+      frame.style.height = height === previous ? previous : height;
+    } catch (error) {
+      // Cross-origin frames keep their fallback height.
+    }
+  };
+  frame.addEventListener("load", () => {
+    fit();
+    if (window.ResizeObserver && frame.contentDocument) new ResizeObserver(fit).observe(frame.contentDocument.body);
+  });
+  window.addEventListener("resize", fit);
+});
+
 document.querySelectorAll("pre").forEach((pre, index) => {
   pre.tabIndex = 0;
   pre.setAttribute("aria-label", "Code example " + (index + 1));

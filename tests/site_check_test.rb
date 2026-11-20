@@ -53,6 +53,15 @@ class SiteCheckTest < Minitest::Test
     assert @checker.errors.any? { |error| error.include?("Source-only or draft file emitted: drafts/FeaturedTables.md") }
   end
 
+  def test_embedded_figures_skip_page_metadata_but_keep_link_checks
+    FileUtils.mkdir_p(File.join(@directory, "images", "post"))
+    figure = File.join(@directory, "images", "post", "figure.html")
+    File.write(figure, '<html lang="en"><title>Figure</title><h2>A</h2><h2>B</h2><a href="/images/post/missing.png">x</a></html>')
+    @checker.check_html(Pathname(figure))
+    assert_equal 1, @checker.errors.size
+    assert_match(/broken internal link/, @checker.errors.first)
+  end
+
   def test_fails_when_build_directory_is_missing
     checker = SiteCheck.new(File.join(@directory, "missing"))
     assert_equal 1, checker.check.size

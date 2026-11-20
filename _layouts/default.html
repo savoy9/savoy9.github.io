@@ -11,7 +11,7 @@
     <header class="masthead shell">
       <a class="identity" href="{{ '/' | relative_url }}">
         <img src="{{ site.avatar | escape }}" alt="Alex Dupler" width="44" height="44">
-        <span><strong>Alex Dupler</strong><span class="identity-note">Power BI field notes</span></span>
+        <strong>Alex Dupler</strong>
       </a>
       <nav aria-label="Main navigation">
         <a href="{{ '/' | relative_url }}"{% if page.url == '/' %} aria-current="page"{% endif %}>Writing</a>
@@ -22,7 +22,6 @@
       {{ content }}
     </main>
     <footer class="footer shell">
-      <p>A technical field notebook. Views are my own.</p>
       <nav aria-label="Elsewhere">
         {% include svg-icons.html %}
       </nav>
