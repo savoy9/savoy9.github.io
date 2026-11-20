@@ -3,13 +3,14 @@ layout: default
 ---
 <article class="post">
   <header class="article-header prose">
-    <p class="eyebrow">{% if page.series_part %}DAX aggregations / Part {{ page.series_part }}{% else %}Field notes{% endif %}</p>
+    {% if page.series_part %}<p class="eyebrow">DAX aggregations / Part {{ page.series_part }}</p>{% endif %}
     <h1>{{ page.title }}</h1>
+    {% if page.subtitle %}<p class="subtitle">{{ page.subtitle }}</p>{% endif %}
     <p class="article-meta"><time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: "%B %-d, %Y" }}</time>{% if page.archived %} <span aria-hidden="true">/</span> Archive{% endif %}</p>
     <ul class="topics" aria-label="Topics">{% for topic in page.topics %}<li>{{ topic }}</li>{% endfor %}</ul>
     {% if page.archived %}
     <aside class="archive-notice" aria-label="Archive notice">
-      <strong>From the 2019 notebook.</strong> These examples and product limitations describe Power BI at the time of writing. They have not been technically re-reviewed and may not reflect current behavior.
+      <strong>From 2019.</strong> These examples and product limitations describe Power BI at the time of writing. They have not been technically re-reviewed and may not reflect current behavior.
     </aside>
     {% endif %}
     {% if page.series_part %}

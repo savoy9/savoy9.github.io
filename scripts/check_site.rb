@@ -99,9 +99,13 @@ class SiteCheck
     route = route_for(file)
     doc = document(file)
     expect(doc.at_css("html")&.[]("lang") == "en", route, "document language missing")
+    expect(!doc.at_css("title")&.text.to_s.strip.empty?, route, "title missing")
+    check_content(route, doc, file)
+    # Standalone interactive figures embedded by posts are not site pages.
+    return if route.start_with?("/images/")
+
     expect(doc.css("h1").size == 1, route, "expected exactly one H1")
     expect(doc.css("main#main").size == 1 && doc.at_css('a[href="#main"]'), route, "skip-link target missing")
-    expect(!doc.at_css("title")&.text.to_s.strip.empty?, route, "title missing")
     expect(!doc.at_css('meta[name="description"]')&.[]("content").to_s.strip.empty?, route, "description missing")
     expect(doc.at_css('link[rel="canonical"]')&.[]("href") == ORIGIN + route, route, "incorrect HTTPS canonical")
     expect(doc.at_css('meta[property="og:url"]')&.[]("content") == ORIGIN + route, route, "incorrect social URL")
@@ -114,17 +118,20 @@ class SiteCheck
     expect(doc.at_css('meta[name="twitter:card"]'), route, "social card missing")
     viewport = doc.at_css('meta[name="viewport"]')&.[]("content").to_s
     expect(!viewport.include?("maximum-scale") && !viewport.include?("user-scalable=no"), route, "zoom restricted")
+    if route == "/"
+      PUBLISHED.keys.grep(/Dax/).each do |post|
+        expect(doc.css("a").any? { |link| link["href"] == post }, route, "published article not discoverable: #{post}")
+      end
+    end
+  end
+
+  def check_content(route, doc, file)
     expect(!file.read.match?(/analytics\.js|UA-\d|google-analytics\.com/), route, "obsolete analytics emitted")
     doc.css("img").each { |img| expect(!img["alt"].to_s.strip.empty?, route, "image alt text missing") }
     doc.css("a").each { |link| expect(!(link["aria-label"] || link.text).strip.empty? || link.at_css("img[alt]"), route, "unnamed link") }
     doc.css("[href], [src], [srcset]").each do |node|
       %w[href src].each { |attr| check_reference(route, node[attr]) if node[attr] }
       node["srcset"]&.split(",")&.each { |entry| check_reference(route, entry.strip.split.first) }
-    end
-    if route == "/"
-      PUBLISHED.keys.grep(/Dax/).each do |post|
-        expect(doc.css("a").any? { |link| link["href"] == post }, route, "published article not discoverable: #{post}")
-      end
     end
   end
 
