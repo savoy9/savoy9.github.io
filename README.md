@@ -79,6 +79,10 @@ document structure, no obsolete analytics, and absence of drafts and source-only
 files. External links are not fetched in CI: remote uptime and historic product
 claims require separate editorial review.
 
+The shared stylesheet and notebook script URLs include the Jekyll build timestamp
+so returning visitors don't pair newly published HTML with assets cached from a
+previous release.
+
 ## GitHub Pages activation
 
 The repository previously published directly from **master / (root)** using the
