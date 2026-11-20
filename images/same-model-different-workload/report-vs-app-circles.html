@@ -53,8 +53,11 @@
   .dof-fig .dof-parts { display: flex; gap: .35rem; }
   .dof-fig .dof-parts button { min-width: 2.75rem; padding-inline: 0; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
   .dof-fig .dof-parts button[aria-current="step"] { background: var(--accent); color: var(--paper); border-color: var(--accent); }
-    font: .75rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
-  @media (max-width: 42rem) { .dof-fig .dof-caption { min-height: 3.2em; } .dof-fig { padding: 1.25rem 1rem 1rem; margin-inline: -1.25rem; } }
+  @media (max-width: 42rem) {
+    .dof-fig .dof-caption { min-height: 3.2em; }
+    .dof-fig { padding: 1.25rem 1rem 1rem; margin-inline: -1.25rem; }
+    .dof-fig .dof-parts { flex-wrap: wrap; min-width: 0; }
+  }
 </style>
 </head>
 <body>
