@@ -2,7 +2,7 @@
 
 A small Jekyll site about Power BI, DAX, and data modeling, hosted at
 <https://savoy9.github.io>. No JavaScript framework, CMS, or external fonts.
-Page-view analytics is off by default.
+Production page-view analytics uses GoatCounter.
 
 ## Local preview
 
@@ -103,14 +103,12 @@ The `github-pages` environment may require owner approval. Actions are pinned to
 commit SHAs; review dependency/action updates deliberately, refresh the lockfile,
 and rerun the build and checks.
 
-## Optional page-view analytics
+## Page-view analytics
 
-To activate [hosted GoatCounter](https://www.goatcounter.com/help/start),
-set `goatcounter_endpoint` in `_config.yml` to your site's public
-`https://YOUR-CODE.goatcounter.com/count` endpoint before a production release.
-This is the public count URL, **not** an API key. Leave it blank to keep tracking
-off, or clear it and rebuild to turn tracking off. Update the site's privacy
-disclosure before activation.
+The public [hosted GoatCounter](https://www.goatcounter.com/help/start) count
+URL is configured in `_config.yml` as `goatcounter_endpoint`. This is **not**
+an API key. Clear it and rebuild to turn tracking off. The About page explains
+the site's use of GoatCounter.
 
 Only top-level content pages on `https://savoy9.github.io` load the GoatCounter
 script; local and other-host previews, the redirect, iframe demos, and 404 pages
