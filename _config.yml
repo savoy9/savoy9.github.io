@@ -5,6 +5,7 @@ author: Alex Dupler
 lang: en
 url: https://savoy9.github.io
 baseurl: ""
+goatcounter_endpoint: ""
 avatar: https://avatars2.githubusercontent.com/u/41710547?s=400&u=3503704ff2731f61749a9134a1d18e451a97d743&v=4
 image: /images/notebook.png
 permalink: /:title/

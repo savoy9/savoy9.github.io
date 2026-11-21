@@ -1,7 +1,8 @@
 # Alex Dupler's field notebook
 
 A small Jekyll site about Power BI, DAX, and data modeling, hosted at
-<https://savoy9.github.io>. No JavaScript framework, CMS, analytics, or external fonts.
+<https://savoy9.github.io>. No JavaScript framework, CMS, or external fonts.
+Page-view analytics is off by default.
 
 ## Local preview
 
@@ -64,6 +65,7 @@ behavior requires an editorial review.
 
 ```sh
 bundle exec ruby tests/site_check_test.rb
+node --test tests/goatcounter.test.cjs
 bundle exec jekyll clean
 JEKYLL_ENV=production bundle exec jekyll build --trace
 bundle exec ruby scripts/check_site.rb
@@ -99,7 +101,29 @@ The workflow builds and checks pull requests without deployment credentials.
 Only a successful checked `master` build can deploy the exact uploaded artifact.
 The `github-pages` environment may require owner approval. Actions are pinned to
 commit SHAs; review dependency/action updates deliberately, refresh the lockfile,
-and rerun the build and checks. No replacement analytics is configured.
+and rerun the build and checks.
+
+## Optional page-view analytics
+
+To activate [hosted GoatCounter](https://www.goatcounter.com/help/start),
+set `goatcounter_endpoint` in `_config.yml` to your site's public
+`https://YOUR-CODE.goatcounter.com/count` endpoint before a production release.
+This is the public count URL, **not** an API key. Leave it blank to keep tracking
+off, or clear it and rebuild to turn tracking off. Update the site's privacy
+disclosure before activation.
+
+Only top-level content pages on `https://savoy9.github.io` load the GoatCounter
+script; local and other-host previews, the redirect, iframe demos, and 404 pages
+do not. Counts are grouped by canonical page path, not query strings or anchors.
+The site does not add click tracking. Keep individual records off and turn off
+[Sessions](https://www.goatcounter.com/help/sessions) in GoatCounter if reloads
+should count as additional views; GoatCounter otherwise deduplicates them.
+
+After activation, use the same dashboard date and timezone for the unfiltered
+site total and the post's canonical path. In a desktop browser with JavaScript
+enabled and blockers off for the check, verify one count request per content
+page load, one for the destination only after opening the old article URL, and
+none for the iframe demos or a preview. The automated test does not send requests.
 
 ## Attribution
 
