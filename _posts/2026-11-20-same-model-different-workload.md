@@ -95,7 +95,7 @@ Anyway, for this blog we are going to focus on the Adventure Works dashboards. T
 
 > that's a great example for our future blog on customizing the DAX vs using machine generated dax. Less good of an example for this blog on query count optimization. maybe that same idea can be applied to a 2 or 4 query pattern for the purpose of this blog post.
 
-All of this resulted in us trying **51 candidates**. The session used **28.02 million tokens**, or **1,134.72 GitHub Copilot AI Credits ($11.35 at list prices)**, and took **41 min 21 sec** across the three run windows. I've pulled out the performance of 4 of these candidates to demonstrate the effect changing the query topology can have.
+All of this resulted in us trying **51 candidates**. The session used **28.02 million tokens**, or **1,134.72 GitHub Copilot AI Credits ($11.35 at list prices)**, and took **41 min 21 sec** across the three run windows. I've pulled out the performance of 4 of these candidates to demonstrate the effect changing the query topology can have. The Adventure Works Rayfin app, Power BI report and model definitions, and all 51 query variants are [on GitHub](https://github.com/savoy9/AlexsPublicPowerBIStuff/tree/master/Rayfin%20Performance).
 #### Results
 
 These results are collected from the Workspace monitoring engine logs. When collecting this data we cleared the cache before sending each batch of queries, but not between each query as queries were submitted concurrently (and some SE events may hit cache from a co-submitted DAX query if the SE event matches).
