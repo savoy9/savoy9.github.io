@@ -12,3 +12,9 @@ I'm a Business Analyst at Microsoft. I work in Field Sales Ops for [Microsoft Ad
 I studied chemistry in college, and spent 5 years working in commercial laboratories in the enviromental testing industry before going to Microsoft. I did everything from benchwork to process improvement and data management to general IT work.
 
 I used to be obsessed with long distance running, and then lindy hop, but these days its all Power BI all the time.
+
+## Site analytics
+
+This site uses [GoatCounter](https://www.goatcounter.com/help/privacy) to count
+page views by page. GoatCounter does not use tracking cookies on this site.
+The blog does not use these counts for advertising.
