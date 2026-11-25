@@ -68,7 +68,7 @@ At the same time, you don't have to get into the weeds of the DAX your agent wri
   <div class="embed-frame">
     <iframe src="{{ '/images/rayfin-performance-query-rewrites/spaceparts-scan-matrix.html?embed=1' | relative_url }}" title="Storage engine scan timeline and navigable formatted xmSQL across the four query forms" loading="lazy" data-autosize style="height: 620px"></iframe>
   </div>
-  <figcaption>Storage engine scan timelines for one representative cold run. Click a scan bar for timing details or its (i) button to inspect and step through the formatted xmSQL; reported rows are logical matching rows rather than physical reads.</figcaption>
+  <figcaption>Storage engine scan timelines for one representative cold run. Click a scan bar for timing details or a row's (i) button to compare formatted xmSQL side by side; reported rows are logical matching rows rather than physical reads.</figcaption>
 </figure>
 
 ---
