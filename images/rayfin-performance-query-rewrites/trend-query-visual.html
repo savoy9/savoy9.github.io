@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>One trend query, four forms</title>
+<style>
+:root{--paper:#f8f7f3;--ink:#202b30;--muted:#536368;--accent:#096777;--line:#cdd5d3;--wash:#edf2ef;
+--base:#536368;--opt1:#096777;--opt2:#7a6696;--pbi:#a0642a;--res:#c9a227;--fail:#9a4b4b}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 Georgia,"Iowan Old Style",serif}
+main{max-width:1100px;margin:0 auto;padding:1.25rem 1rem 4rem}
+h1,h2,h3,button,.ui,table,figcaption,.small,.chip,summary{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+h1{font-size:1.5rem;line-height:1.2;margin:.3rem 0 1.2rem}
+h2{font-size:1.2rem;margin:0 0 .6rem}
+p{margin:.4rem 0 .7rem}
+.small{font-size:.85rem;color:var(--muted)}
+.proto{display:inline-block;font:600 .7rem system-ui;letter-spacing:.06em;text-transform:uppercase;background:var(--ink);color:var(--paper);padding:.15rem .45rem;border-radius:3px}
+figure{margin:0 0 2.4rem;padding:1rem;border:1px solid var(--line);background:#fff;border-radius:6px}
+button{font-size:.85rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:4px;padding:.4rem .7rem;cursor:pointer;min-height:36px}
+button[aria-pressed=true],button[aria-selected=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid #e0a800;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+.na{color:var(--muted);font-style:italic}
+details.notes{margin-top:.9rem;border-top:1px solid var(--line);padding-top:.5rem;font:.84rem/1.45 system-ui;color:var(--muted)}
+details.notes p{margin:.35rem 0}
+summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:.85rem}
+
+/* ---------- Fig 1 ---------- */
+.formtabs{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin:0 0 .8rem}
+.formtabs button{text-align:left;padding:.5rem .6rem;border-left:5px solid var(--c);line-height:1.25}
+.formtabs b{display:block}
+.formtabs .st{display:block;font-size:.78rem;margin-top:.25rem;font-variant-numeric:tabular-nums}
+.formtabs button[aria-selected=true] .st{color:#dfe7e6}
+.walk{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(16rem,1fr);gap:1rem;align-items:start}
+.codecol,.sidecol{min-width:0}
+.taglegend{display:flex;flex-wrap:wrap;gap:.3rem;margin:0 0 .4rem}
+.tag{display:inline-block;font:600 .68rem/1.5 system-ui;letter-spacing:.02em;padding:0 .4rem;border-radius:3px;color:#fff;white-space:nowrap}
+pre.dax{margin:0;background:#fbfbf9;border:1px solid var(--line);border-radius:4px;padding:.5rem 0;font:13px/1.5 ui-monospace,Consolas,Menlo,monospace;white-space:pre-wrap;word-break:break-word}
+pre.dax span{display:block;padding:0 .6rem 0 .8rem;border-left:4px solid transparent}
+pre.dax span .tag{float:right;margin-left:.5rem;font-size:.64rem}
+.explain{font-size:1rem;line-height:1.5;border-left:5px solid var(--c);padding:.1rem 0 .1rem .8rem;margin:0 0 .9rem}
+.sample caption{text-align:left;font:600 .8rem system-ui;color:var(--muted);padding-bottom:.25rem}
+.sample td,.sample th{font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;font-size:.8rem;width:100%}
+th,td{padding:.28rem .4rem;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-weight:600;color:var(--muted);vertical-align:bottom;white-space:normal}
+td.left{text-align:left;white-space:normal}
+.tablewrap{overflow-x:auto;margin-top:.4rem}
+
+/* ---------- Fig 2 ---------- */
+.rt{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.svgwrap{width:100%;overflow:hidden;min-width:0}
+svg text{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.legend{display:flex;flex-wrap:wrap;gap:.25rem .9rem;font:.78rem system-ui;color:var(--muted);margin:.4rem 0 0}
+.legend i{display:inline-block;width:.8rem;height:.8rem;border-radius:2px;vertical-align:-1px;margin-right:.3rem}
+.legend i.dot{border-radius:50%}
+.scanlist td,.scanlist th{white-space:normal;text-align:left}
+.scanlist .bar{height:10px;border-radius:2px;display:inline-block;vertical-align:middle}
+.flag{font-size:.68rem;border-radius:3px;padding:0 .25rem;margin-left:.2rem;white-space:nowrap}
+.flag.ym{background:#efe6f6;color:#4b3966;border:1px solid #c9b8dc}
+.flag.cb{background:#fbe8e6;color:#7a2f27;border:1px solid #e1b2ac}
+.flag.key{background:var(--wash);color:var(--accent);border:1px solid #b8d2cc}
+
+/* ---------- Fig 3 ---------- */
+.detail{font:.85rem system-ui;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:.45rem .6rem;margin-top:.5rem;min-height:2.6rem}
+svg .att{cursor:pointer}
+svg .att:focus{outline:none}
+svg .att:focus .ring,svg .att.sel .ring{stroke:#e0a800;stroke-width:3}
+
+@media (max-width:820px){
+  .walk,.rt{grid-template-columns:1fr}
+  .formtabs{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:420px){
+  main{padding:.8rem .5rem 3rem}
+  figure{padding:.7rem .55rem}
+  pre.dax{font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+body.embed{background:#fff}
+body.embed main{max-width:none;padding:.75rem 1rem 1rem}
+body.embed h1{display:none}
+body.embed figure{margin:0;border:0;padding:0;border-radius:0}
+</style>
+</head>
+<body>
+<main>
+<h1>One trend query, four ways</h1>
+
+<!-- ================= FIG 1 ================= -->
+<figure id="fig1" aria-labelledby="f1t">
+  <h2 id="f1t">4 example queries</h2>
+  <div class="formtabs" role="tablist" aria-label="Query" id="formtabs"></div>
+  <div class="walk">
+    <div class="codecol">
+      <div class="taglegend" id="taglegend" aria-hidden="true"></div>
+      <pre class="dax" id="dax"></pre>
+    </div>
+    <div class="sidecol">
+      <p class="explain" id="explain" aria-live="polite"></p>
+      <div class="tablewrap" id="sample"></div>
+    </div>
+  </div>
+</figure>
+
+<!-- ================= FIG 2 ================= -->
+<figure id="fig2" aria-labelledby="f2t">
+  <h2 id="f2t">Runtime</h2>
+  <div class="rt">
+    <div class="svgwrap" id="rtEl"></div>
+    <div class="svgwrap" id="rtCpu"></div>
+    <div class="svgwrap" id="rtSe"></div>
+  </div>
+  <div class="legend"><span><i style="background:#536368"></i>SE CPU</span><span><i style="background:#536368;opacity:.3"></i>FE CPU</span><span><i class="dot" style="background:#fff;border:1.5px solid var(--ink)"></i>one run</span><span>× = CPU ÷ elapsed</span></div>
+  <p class="small" style="margin:.5rem 0 0">Median of 5 cold runs each.</p>
+</figure>
+
+<!-- ================= FIG 3 ================= -->
+<figure id="fig3" aria-labelledby="f3t">
+  <h2 id="f3t">Optimization experiments</h2>
+  <div class="row ui" style="margin:.2rem 0 .4rem">
+    <button data-m="el" aria-pressed="true">Elapsed</button>
+    <button data-m="cpu" aria-pressed="false">CPU</button>
+  </div>
+  <div class="legend" id="f3legend"></div>
+  <div class="svgwrap" id="f3wrap"></div>
+  <div class="detail" id="f3detail" aria-live="polite">Select a mark for details.</div>
+  <details class="notes"><summary>All experiments</summary>
+    <div id="f3cap"></div>
+    <div class="tablewrap"><table id="f3table"></table></div>
+  </details>
+</figure>
+</main>
+
+<script>
+"use strict";
+const med=a=>{const s=[...a].sort((x,y)=>x-y),n=s.length;return n%2?s[(n-1)/2]:(s[n/2-1]+s[n/2])/2};
+const fmt=v=>v==null?"—":Math.round(v).toLocaleString("en-US");
+const f1=v=>v==null?"—":v.toFixed(1);
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+/* =====================================================================
+   FIG 1 DATA: DAX text (tag|line). Tags: w window, g grain, m measures,
+   j join, s show-all, t TOPN, o output/order, x extra result, - neutral
+   ===================================================================== */
+const parse=t=>t.trim().split("\n").map(l=>{const i=l.indexOf("|");return[l.slice(0,i),l.slice(i+1).replace(/\t/g,"    ")]});
+const DAX={
+base:parse(`
+o|EVALUATE
+w|VAR WindowStart = [Trend start month]
+w|VAR WindowEnd = [Trend end month]
+o|RETURN
+g|SUMMARIZECOLUMNS(
+g|    'Trend Date'[Year Month],
+g|    'Trend Date'[Month Start],
+w|    FILTER(
+w|        ALL('Trend Date'),
+w|        'Trend Date'[Month Start] >= WindowStart &&
+w|        'Trend Date'[Month Start] <= WindowEnd
+w|    ),
+-|    
+m|    "Sales", IGNORE([Trend Net sales EUR]),
+m|    "Budget", IGNORE([Trend Budget EUR]),
+m|    "ReturnsPct", IGNORE([Trend Returns & warranty %]),
+m|    "OTD", IGNORE([Trend On-time delivery %])
+g|)
+o|ORDER BY 'Trend Date'[Month Start] ASC`),
+opt1:parse(`
+o|EVALUATE
+w|VAR WindowStart = [Trend start month]
+w|VAR WindowEnd = [Trend end month]
+g|VAR Grain = SUMMARIZECOLUMNS('Trend Date'[Year Month], 'Trend Date'[Month Start],
+w|    FILTER(ALL('Trend Date'), 'Trend Date'[Month Start] >= WindowStart && 'Trend Date'[Month Start] <= WindowEnd))
+m|RETURN ADDCOLUMNS(Grain,
+m|    "Sales", [Trend Net sales EUR], "Budget", [Trend Budget EUR],
+m|    "ReturnsPct", [Trend Returns & warranty %], "OTD", [Trend On-time delivery %]
+m|)
+o|ORDER BY 'Trend Date'[Month Start] ASC`),
+opt2:parse(`
+o|EVALUATE
+w|VAR WindowStart = [Trend start month]
+w|VAR WindowEnd = [Trend end month]
+w|VAR Months = SELECTCOLUMNS(GENERATESERIES(0, 23), "Key", EDATE(WindowStart, [Value]))
+w|VAR MonthFilter = TREATAS(FILTER(Months, [Key] <= WindowEnd), 'Trend Date'[Month Start])
+g|VAR Grain = SUMMARIZECOLUMNS('Trend Date'[Year Month], 'Trend Date'[Month Start], MonthFilter)
+m|VAR MonthKeys = SUMMARIZECOLUMNS('Trend Date'[Month Start], MonthFilter)
+j|RETURN NATURALLEFTOUTERJOIN(Grain,
+m|    ADDCOLUMNS(MonthKeys,
+m|        "Sales", [Trend Net sales EUR], "Budget", [Trend Budget EUR],
+m|        "ReturnsPct", [Trend Returns & warranty %], "OTD", [Trend On-time delivery %]
+j|))
+o|ORDER BY 'Trend Date'[Month Start] ASC`),
+pbiA:parse(`
+o|DEFINE
+w|    VAR __WindowStart = [Trend start month]
+w|    VAR __WindowEnd = [Trend end month]
+-|
+w|    VAR __DS0FilterTable =
+w|        FILTER(
+w|            ALL('Trend Date'),
+w|            'Trend Date'[Month Start] >= __WindowStart &&
+w|            'Trend Date'[Month Start] <= __WindowEnd
+w|        )
+-|
+g|    VAR __DS0Core =
+g|        SUMMARIZECOLUMNS(
+g|            'Trend Date'[Year Month],
+g|            'Trend Date'[Month Start],
+w|            __DS0FilterTable,
+m|            "Sales", IGNORE('Invoices'[Trend Net sales EUR]),
+m|            "Budget", IGNORE('Invoices'[Trend Budget EUR]),
+m|            "ReturnsPct", IGNORE('Invoices'[Trend Returns & warranty %]),
+m|            "OTD", IGNORE('Invoices'[Trend On-time delivery %])
+g|        )
+-|
+s|    VAR __DS0PrimaryShowAll =
+s|        ADDMISSINGITEMS(
+s|            'Trend Date'[Year Month],
+s|            'Trend Date'[Month Start],
+s|            __DS0Core,
+s|            'Trend Date'[Year Month],
+s|            'Trend Date'[Month Start],
+s|            __DS0FilterTable
+s|        )
+-|
+t|    VAR __DS0PrimaryWindowed =
+t|        TOPN(1001, __DS0PrimaryShowAll, 'Trend Date'[Year Month], 1)
+-|
+o|EVALUATE
+o|    __DS0PrimaryWindowed
+-|
+o|ORDER BY 'Trend Date'[Month Start] ASC`),
+pbiX:parse(`
+o|DEFINE
+x|	MEASURE 'Invoices'[SP Trend EUR axis max] = 
+x|		(/* USER DAX BEGIN */
+x|VAR hi=MAXX(ALLSELECTED('Trend Date'[Year Month]),MAX(CALCULATE([Trend Net sales EUR]),CALCULATE([Trend Budget EUR]))) RETURN MAX(1,hi*1.08)
+x|/* USER DAX END */)
+-|
+w|	VAR __DS0FilterTable = 
+w|		FILTER(
+w|			KEEPFILTERS(VALUES('Trend Date'[Date])),
+w|			AND('Trend Date'[Date] >= DATE(2020, 8, 1), 'Trend Date'[Date] <= DATE(2022, 7, 31))
+w|		)
+-|
+g|	VAR __DS0Core = 
+g|		SUMMARIZECOLUMNS(
+g|			'Trend Date'[Year Month],
+w|			__DS0FilterTable,
+m|			"Trend_Budget_EUR", 'Invoices'[Trend Budget EUR],
+m|			"Trend_Net_sales_EUR", 'Invoices'[Trend Net sales EUR],
+m|			"Trend_Returns___warranty__", IGNORE('Invoices'[Trend Returns & warranty %]),
+m|			"Trend_On_time_delivery__", IGNORE('Invoices'[Trend On-time delivery %])
+g|		)
+-|
+s|	VAR __DS0PrimaryShowAll = 
+s|		ADDMISSINGITEMS('Trend Date'[Year Month], __DS0Core, 'Trend Date'[Year Month], __DS0FilterTable)
+-|
+t|	VAR __DS0PrimaryWindowed = 
+t|		TOPN(1001, __DS0PrimaryShowAll, 'Trend Date'[Year Month], 1)
+-|
+x|EVALUATE
+x|	SUMMARIZECOLUMNS(
+x|		__DS0FilterTable,
+x|		"SP Trend EUR axis max", IGNORE('Invoices'[SP Trend EUR axis max])
+x|	)
+-|
+o|EVALUATE
+o|	__DS0PrimaryWindowed
+-|
+o|ORDER BY
+o|	'Trend Date'[Year Month]`)
+};
+
+const TAGS={w:["Window","#2c6fa8","#e6eff8"],g:["Grain","#2f7d43","#e5f2e8"],m:["Measures","#a35f00","#fcf0dc"],j:["Join","#a33d72","#f8e6f0"],s:["Show-all","#5d6470","#eceef1"],t:["Row cap","#7a5a2a","#f2ece2"],x:["Extra result","#a33a3a","#f9e5e5"]};
+const FORMS=[
+ {k:"base",c:"var(--base)",name:"Original",sub:"one-shot app query"},
+ {k:"pbi",c:"var(--pbi)",name:"PBI Style",sub:"Power BI report pattern"},
+ {k:"opt1",c:"var(--opt1)",name:"Round 1",sub:"ADDCOLUMNS over SUMMARIZECOLUMNS"},
+ {k:"opt2",c:"var(--opt2)",name:"Round 2",sub:"month-key join"}
+];
+const EXPLAIN={
+ base:"One SUMMARIZECOLUMNS does everything: it filters the calendar to the 24-month window, groups by both the Year Month label and the Month Start key, and evaluates all four measures in one pass.",
+ opt1:"Split in two. SUMMARIZECOLUMNS only lists the 24 months; ADDCOLUMNS then evaluates the four measures once per month. Same window, same output.",
+ opt2:"The window becomes an explicit list of 24 month keys instead of a date-range test. The measures are evaluated per Month Start key only, and the Year Month labels are joined back at the end, so the fact-table scans no longer group by the label.",
+ pbiA:"The pattern Power BI reports generate: each step is a named variable (filter, core SUMMARIZECOLUMNS, ADDMISSINGITEMS show-all, TOPN row cap). Pointed at the app's window and columns, it returns the same table. Its core is the original query, and so is its cost.",
+};
+// Illustrative values only: no result rows were retained. Columns/order match the verified output.
+const SAMPLE=[["Aug 2020","2020-08-01","1,284,310","1,250,000","2.4%","94.1%"],["Sep 2020","2020-09-01","1,317,962","1,275,000","2.1%","93.6%"],["Oct 2020","2020-10-01","1,402,118","1,300,000","2.7%","92.8%"],["Nov 2020","2020-11-01","1,366,540","1,325,000","2.3%","94.5%"],["Dec 2020","2020-12-01","1,198,775","1,350,000","3.0%","91.9%"]];
+const SAMPLE_COLS=["Year Month","Month Start","Sales","Budget","ReturnsPct","OTD"];
+
+function Fig1(){
+  let form="base";
+  const run=RUNS.reduce((o,r)=>(o[r.k]=r,o),{});
+  const tabs=document.getElementById("formtabs");
+  tabs.innerHTML=FORMS.map(f=>{const r=run[f.k];return `<button role="tab" data-f="${f.k}" style="--c:${f.c}" aria-selected="${f.k===form}"><b>${f.name}</b><span class="small" style="color:inherit;opacity:.8">${f.sub}</span><span class="st">${fmt(med(r.el))} ms · ${fmt(med(r.cpu))} ms CPU<br>${r.scans} outer SE scans</span></button>`}).join("");
+  function render(){
+    const k=form==="pbi"?"pbiA":form,F=FORMS.find(f=>f.k===form),lines=DAX[k];
+    tabs.querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",b.dataset.f===form));
+    const present=[...new Set(lines.map(l=>l[0]).filter(t=>TAGS[t]))];
+    document.getElementById("taglegend").innerHTML=present.map(t=>`<span class="tag" style="background:${TAGS[t][1]}">${TAGS[t][0]}</span>`).join("");
+    let prev="";
+    document.getElementById("dax").innerHTML=lines.map(([t,s])=>{
+      const T=TAGS[t];let chip="";
+      if(T&&t!==prev)chip=`<span class="tag" style="background:${T[1]}">${T[0]}</span>`;
+      if(s.trim())prev=t;
+      return T?`<span style="background:${T[2]};border-left-color:${T[1]}">${chip}${esc(s)||" "}</span>`:`<span>${esc(s)||" "}</span>`;
+    }).join("");
+    const ex=document.getElementById("explain");ex.style.setProperty("--c",F.c);ex.textContent=EXPLAIN[k];
+    document.getElementById("sample").innerHTML=`<table class="sample"><caption>Output, first 5 of 24 rows · illustrative values</caption><thead><tr>${SAMPLE_COLS.map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${SAMPLE.map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+  tabs.addEventListener("click",e=>{const b=e.target.closest("[data-f]");if(b){form=b.dataset.f;render()}});
+  tabs.addEventListener("keydown",e=>{if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;const i=FORMS.findIndex(f=>f.k===form),n=(i+(e.key==="ArrowRight"?1:3))%4;form=FORMS[n].k;render();tabs.children[n].focus()});
+  render();
+}
+
+/* =====================================================================
+   FIG 2 DATA (per request).  [trial, elapsed, totalCpu, seCpu, nonSeCpu]
+   ===================================================================== */
+// Round 1 forms block (forms.audit.json, block trend-addcolumns-summarizecolumns-v2). Candidate ran first in every pair.
+const R1={control:[[1,626,4063,3969,94],[2,625,4063,3984,78],[3,625,4484,4453,31],[4,595,4000,3922,78],[5,609,3906,3828,78]],
+          cand:[[1,469,2938,2891,47],[2,469,2875,2813,63],[3,485,2922,2828,94],[4,485,3156,3109,47],[5,516,2891,2781,109]]};
+// Round 1 native block (native.audit.json, block native-trend). Control ran first in every pair.
+const NAT={control:[[1,656,4109,4031,78],[2,703,4219,4156,63],[3,610,3969,3922,47],[4,641,3734,3641,94],[5,672,4047,3906,141]],
+          cand:[[1,610,3781,3703,78],[2,625,4172,4109,63],[3,658,4016,3906,109],[4,672,4281,4234,47],[5,688,3969,3891,78]]};
+// Round 2 confirmation, default fixture (confirmation.requests.csv). [block, trial, arm w=control|c=candidate, startUtc, elapsed, cpu, seCpu, seBegins, outerBegins]
+const R2RAW=[["nonvisual-grain",1,"w","06:25:34.612",516,3234,3188,23,12],["nonvisual-grain",1,"c","06:25:35.583",406,2047,1922,23,12],["nonvisual-grain",2,"c","06:25:36.352",375,2344,2297,23,12],["nonvisual-grain",2,"w","06:25:37.114",485,2891,2813,23,12],["nonvisual-grain",3,"w","06:25:37.976",469,2828,2734,23,12],["nonvisual-grain",3,"c","06:25:38.831",359,2359,2281,23,12],["nonvisual-grain",4,"c","06:25:39.571",376,2219,2156,23,12],["nonvisual-grain",4,"w","06:25:40.336",500,3094,2984,23,12],["nonvisual-grain",5,"w","06:25:41.222",516,3094,3063,23,12],["nonvisual-grain",5,"c","06:25:42.107",391,2188,2141,23,12],["month-key-join",1,"w","06:25:42.876",500,2984,2891,23,12],["month-key-join",1,"c","06:25:43.751",344,1797,1766,25,13],["month-key-join",2,"c","06:25:44.470",328,1750,1672,25,13],["month-key-join",2,"w","06:25:45.185",470,2641,2500,23,12],["month-key-join",3,"w","06:25:46.038",500,3031,2969,23,12],["month-key-join",3,"c","06:25:46.908",313,1859,1797,25,13],["month-key-join",4,"c","06:25:47.613",328,1875,1813,25,13],["month-key-join",4,"w","06:25:48.317",469,3047,3000,23,12],["month-key-join",5,"w","06:25:49.183",531,3219,3156,23,12],["month-key-join",5,"c","06:25:50.092",341,1750,1688,25,13]];
+const r2arm=(b,a)=>R2RAW.filter(r=>r[0]===b&&r[2]===a).sort((x,y)=>x[1]-y[1]).map(r=>[r[1],r[4],r[5],r[6],r[5]-r[6],r[7],r[8]]);
+
+// SE scans = median outer VertiPaqScan requests per query (figure-data.json read-only backfill; medians only, no per-run counts).
+const RUNS=[
+ {k:"base",n:"Original",c:"var(--base)",rows:NAT.control,scans:13},
+ {k:"pbi",n:"PBI Style",c:"var(--pbi)",rows:NAT.cand,scans:13},
+ {k:"opt1",n:"Round 1",c:"var(--opt1)",rows:r2arm("month-key-join","w"),scans:12},
+ {k:"opt2",n:"Round 2",c:"var(--opt2)",rows:r2arm("month-key-join","c"),scans:13}
+].map(r=>({...r,el:r.rows.map(x=>x[1]),cpu:r.rows.map(x=>x[2]),se:r.rows.map(x=>x[3]),conc:r.rows.map(x=>x[2]/x[1])}));
+
+const RT={el:{t:"Elapsed (ms)",max:750,ticks:[0,250,500,750]},cpu:{t:"CPU (ms)",max:4800,ticks:[0,2000,4000]},se:{t:"Outer SE scans",max:16,ticks:[0,5,10,15]}};
+function rtSvg(kind,W,labels){
+  const K=RT[kind],ml=labels?74:8,mr=kind==="cpu"?86:58,rowH=36,top=24,H=top+RUNS.length*rowH+20;
+  const X=v=>ml+(W-ml-mr)*v/K.max;
+  let s=`<svg width="${W}" height="${H}" role="img" aria-label="${K.t} per query">`;
+  s+=`<text x="${labels?0:ml}" y="12" font-size="12" font-weight="600" fill="#202b30">${K.t}</text>`;
+  K.ticks.forEach(t=>{const x=X(t);s+=`<line x1="${x}" x2="${x}" y1="${top}" y2="${H-18}" stroke="#e3e8e6"/><text x="${x}" y="${H-5}" font-size="10" fill="#536368" text-anchor="middle">${t.toLocaleString("en-US")}</text>`});
+  const dots=(vals,y,u)=>vals.map(v=>`<circle cx="${X(v)}" cy="${y}" r="3" fill="#fff" stroke="#202b30" stroke-width="1.2"><title>one run: ${fmt(v)}${u}</title></circle>`).join("");
+  RUNS.forEach((r,i)=>{
+    const y=top+i*rowH+8,bh=18,cy=y+bh/2;
+    if(labels)s+=`<text x="${ml-8}" y="${cy+4}" font-size="12" font-weight="600" fill="#202b30" text-anchor="end">${r.n}</text>`;
+    if(kind==="el"){
+      const m=med(r.el);
+      s+=`<rect x="${ml}" y="${y}" width="${X(m)-ml}" height="${bh}" fill="${r.c}" opacity=".85"><title>${r.n}: median ${m} ms</title></rect>`+dots(r.el,cy," ms");
+      s+=`<text x="${X(Math.max(m,...r.el))+6}" y="${cy+4}" font-size="12" fill="#202b30">${fmt(m)}</text>`;
+    }else if(kind==="cpu"){
+      const t=med(r.cpu),se=med(r.se),c=med(r.conc);
+      s+=`<rect x="${ml}" y="${y}" width="${X(se)-ml}" height="${bh}" fill="${r.c}"><title>${r.n}: median SE CPU ${fmt(se)} ms</title></rect>`;
+      s+=`<rect x="${X(se)}" y="${y}" width="${Math.max(1.5,X(t)-X(se))}" height="${bh}" fill="${r.c}" opacity=".3"><title>${r.n}: median FE CPU (total − SE) ≈ ${fmt(t-se)} ms (total ${fmt(t)})</title></rect>`+dots(r.cpu,cy," ms total CPU");
+      s+=`<text x="${X(Math.max(t,...r.cpu))+6}" y="${cy+4}" font-size="12" fill="#202b30">${fmt(t)} · ${f1(c)}×</text>`;
+    }else{
+      const m=r.scans;
+      s+=`<rect x="${ml}" y="${y}" width="${X(m)-ml}" height="${bh}" fill="${r.c}" opacity=".85"><title>${r.n}: median ${m} outer SE scans</title></rect>`;
+      s+=`<text x="${X(m)+6}" y="${cy+4}" font-size="12" fill="#202b30">${m}</text>`;
+    }
+  });
+  return s+`</svg>`;
+}
+function Fig2(){
+  function draw(){
+    const ids={el:"rtEl",cpu:"rtCpu",se:"rtSe"},stacked=document.getElementById("rtEl").offsetTop!==document.getElementById("rtCpu").offsetTop;
+    Object.entries(ids).forEach(([k,id])=>{const el=document.getElementById(id);el.innerHTML=rtSvg(k,Math.max(240,el.clientWidth),stacked||k==="el")});
+  }
+  draw();
+  let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{draw();if(!document.getElementById("fig3").hidden)Fig3.draw()},120)});
+}
+
+/* =====================================================================
+   FIG 3: attempts. One mark per (candidate, block). status:
+   fail = parity failed, no timing · pilot = n 1–2 · confirm = n 5 · ref = Desktop reference (not an optimizer candidate)
+   el/cpu = [block control median, candidate median]
+   ===================================================================== */
+const ATT=[
+ // Round 1 · pilot (n=1) · control = original
+ {s:1,t:"02:16:16",blk:"pilot",c:"trend-key-window",st:"pilot",n:1,el:[830,688],cpu:[3938,4281]},
+ {s:1,t:"02:16:18",blk:"pilot",c:"trend-addcolumns-summarize",st:"fail",n:1},
+ {s:1,t:"02:16:20",blk:"pilot",c:"trend-addcolumns-summarizecolumns",st:"fail",n:1},
+ {s:1,t:"02:16:21",blk:"pilot",c:"trend-generate-row",st:"fail",n:1},
+ {s:1,t:"02:16:22",blk:"pilot",c:"trend-filter-outside",st:"pilot",n:1,el:[610,547],cpu:[3875,3359]},
+ {s:1,t:"02:16:24",blk:"pilot",c:"trend-filter-post",st:"fail",n:1},
+ // Round 1 · pilot-v2 (n=1)
+ {s:1,t:"02:17:04",blk:"pilot-v2",c:"addcolumns-summarize-v2",st:"pilot",n:1,el:[641,453],cpu:[3922,2984]},
+ {s:1,t:"02:17:06",blk:"pilot-v2",c:"addcolumns-summarizecolumns-v2",st:"pilot",n:1,el:[625,485],cpu:[4016,3125]},
+ {s:1,t:"02:17:08",blk:"pilot-v2",c:"generate-row-v2",st:"pilot",n:1,el:[672,516],cpu:[4047,2953]},
+ {s:1,t:"02:17:10",blk:"pilot-v2",c:"filter-post-v2",st:"pilot",n:1,el:[625,485],cpu:[3891,3047]},
+ // Round 1 · forms (n=5)
+ {s:1,t:"02:18:33",blk:"forms",c:"addcolumns-summarize-v2",st:"confirm",n:5,el:[657,516],cpu:[4141,2969]},
+ {s:1,t:"02:18:35",blk:"forms",c:"addcolumns-summarizecolumns-v2",st:"confirm",n:5,el:[625,485],cpu:[4063,2922],win:"Round 1 winner"},
+ {s:1,t:"02:18:37",blk:"forms",c:"trend-key-window",st:"confirm",n:5,el:[657,641],cpu:[4063,4031]},
+ {s:1,t:"02:18:39",blk:"forms",c:"generate-row-v2",st:"confirm",n:5,el:[657,500],cpu:[4031,3141]},
+ {s:1,t:"02:18:41",blk:"forms",c:"trend-filter-outside",st:"confirm",n:5,el:[688,563],cpu:[3859,3297]},
+ {s:1,t:"02:18:43",blk:"forms",c:"filter-post-v2",st:"confirm",n:5,el:[641,469],cpu:[3875,2953]},
+ // Round 1 · native references (n=5)
+ {s:1,t:"02:21:20",blk:"native",c:"native-trend (Desktop adaptation)",st:"ref",n:5,el:[656,658],cpu:[4047,4016]},
+ {s:1,t:"02:21:22",blk:"native",c:"native-trend-no-showall",st:"ref",n:5,el:[641,672],cpu:[4125,4094]},
+ // Round 2 · control = Round 1 winner
+ {s:2,t:"06:21:18",blk:"pilots",c:"range-grain",st:"pilot",n:2},
+ {s:2,t:"06:21:21",blk:"pilots",c:"treatas-grain",st:"pilot",n:2},
+ {s:2,t:"06:21:25",blk:"pilots",c:"treatas-measures",st:"pilot",n:2},
+ {s:2,t:"06:23:30",blk:"pilots-second",c:"nonvisual-grain",st:"pilot",n:2},
+ {s:2,t:"06:23:33",blk:"pilots-second",c:"month-key-join",st:"pilot",n:2},
+ {s:2,t:"06:25:34",blk:"confirmation",c:"nonvisual-grain",st:"confirm",n:5},
+ {s:2,t:"06:25:42",blk:"confirmation",c:"month-key-join",st:"confirm",n:5,win:"Round 2 winner"}
+];
+// Round 2 pilot rows (pilots / pilots-second requests.csv). [candidate, arm, elapsed, cpu]
+const R2P=[["range-grain","w",578,2938],["range-grain","c",438,3156],["range-grain","c",469,3156],["range-grain","w",531,2859],["treatas-grain","w",500,3281],["treatas-grain","c",500,3094],["treatas-grain","c",485,3141],["treatas-grain","w",610,2938],["treatas-measures","w",479,2906],["treatas-measures","c",484,2828],["treatas-measures","c",453,2609],["treatas-measures","w",469,2844],["nonvisual-grain","w",563,3094],["nonvisual-grain","c",391,1922],["nonvisual-grain","c",375,2234],["nonvisual-grain","w",526,2906],["month-key-join","w",516,2984],["month-key-join","c",360,2063],["month-key-join","c",359,1813],["month-key-join","w",656,3109]];
+ATT.filter(a=>a.s===2).forEach(a=>{
+  const src=a.blk==="confirmation"?R2RAW.filter(r=>r[0]===a.c).map(r=>[r[0],r[2],r[4],r[5]]):R2P.filter(r=>r[0]===a.c);
+  const g=(arm,i)=>med(src.filter(r=>r[1]===arm).map(r=>r[i]));
+  a.el=[g("w",2),g("c",2)];a.cpu=[g("w",3),g("c",3)];
+});
+// non-comparable fixture screens (different filter context): plotted in their own lane
+const NC=[{s:1,t:"02:21:44",what:"J9 edge parity screen: 9 forms, parity only, no paired timing"},
+ {s:2,t:"06:21:30",what:"J9 gate: range-grain, treatas-grain, treatas-measures (J9 fixture)"},
+ {s:2,t:"06:23:38",what:"J9 second: nonvisual-grain, month-key-join (J9 fixture)"},
+ {s:2,t:"06:25:52",what:"J9 confirmation: nonvisual-grain, month-key-join · no runtime gain"}];
+// Experiments: one point per distinct optimizer candidate, in order of first attempt. The value is its
+// most complete measurement (5-pair confirmation if one ran, else pilot). 0 = original app query.
+const NICE={"trend-key-window":"key window","trend-addcolumns-summarize":"ADDCOLUMNS/SUMMARIZE","trend-addcolumns-summarizecolumns":"ADDCOLUMNS/SUMMARIZECOLUMNS","trend-generate-row":"GENERATE row","trend-filter-outside":"filter outside","trend-filter-post":"filter post","addcolumns-summarize-v2":"ADDCOLUMNS/SUMMARIZE v2","addcolumns-summarizecolumns-v2":"ADDCOLUMNS over SUMMARIZECOLUMNS","generate-row-v2":"GENERATE row v2","filter-post-v2":"filter post v2","range-grain":"range grain","treatas-grain":"TREATAS grain","treatas-measures":"TREATAS measures","nonvisual-grain":"NONVISUAL grain","month-key-join":"month-key join"};
+const EXP=(()=>{const order=[],by={};
+  ATT.filter(a=>a.st!=="ref").forEach(a=>{if(!by[a.c]){by[a.c]=[];order.push(a.c)}by[a.c].push(a)});
+  return [{x:0,c:"original",label:"baseline",st:"kept",s:1,n:5,el:[null,625],cpu:[null,4063],blk:"forms (control)"}].concat(order.map((c,i)=>{
+    const L=by[c],a=L.filter(t=>t.st!=="fail").sort((p,q)=>q.n-p.n)[0]||L[0];
+    return {x:i+1,c,label:NICE[c]||c,st:a.st==="fail"?"fail":a.win?"kept":"disc",s:a.s,n:a.n,el:a.el,cpu:a.cpu,blk:a.blk,tries:L.length};
+  }));})();
+const Fig3={metric:"el",sel:null};
+Fig3.best=m=>{let b=Infinity;return EXP.map(e=>{if(e.st==="fail")return false;const v=e[m][1];if(v<b){b=v;return true}return false})};
+Fig3.draw=function(){
+  const wrap=document.getElementById("f3wrap"),W=Math.max(300,wrap.clientWidth),narrow=W<560;
+  const ml=narrow?42:56,mr=narrow?10:24,top=26,ph=narrow?260:340,H=top+ph+42;
+  const m=Fig3.metric,[lo,hi]=m==="el"?[0,720]:[0,5000],N=EXP.length-1,B=Fig3.best(m);
+  const X=x=>ml+(W-ml-mr)*(x+.6)/(N+1.2),Y=v=>top+ph-(v-lo)/(hi-lo)*ph;
+  const KEPT="#1f8a5b";
+  let s=`<svg width="${W}" height="${H}" role="img" aria-label="Optimization experiments with running best">`;
+  const ticks=m==="el"?[0,200,400,600]:[0,1000,2000,3000,4000];
+  ticks.forEach(v=>s+=`<line x1="${ml}" x2="${W-mr}" y1="${Y(v)}" y2="${Y(v)}" stroke="#eceeed"/><text x="${ml-6}" y="${Y(v)+3.5}" font-size="10" fill="#536368" text-anchor="end">${v.toLocaleString("en-US")}</text>`);
+  [0,5,10,15].forEach(x=>s+=`<line x1="${X(x)}" x2="${X(x)}" y1="${top}" y2="${top+ph}" stroke="#f1f3f2"/><text x="${X(x)}" y="${top+ph+14}" font-size="10" fill="#536368" text-anchor="middle">${x}</text>`);
+  s+=`<text x="${(ml+W-mr)/2}" y="${H-4}" font-size="11" fill="#202b30" text-anchor="middle">Experiment #</text>`;
+  s+=`<text transform="translate(11,${top+ph/2}) rotate(-90)" font-size="11" fill="#202b30" text-anchor="middle">${m==="el"?"Elapsed":"CPU"}, ms (lower is better)</text>`;
+  // round divider
+  const r2=EXP.find(e=>e.s===2).x,bx=(X(r2-1)+X(r2))/2;
+  s+=`<line x1="${bx}" x2="${bx}" y1="${top}" y2="${top+ph}" stroke="#c9d1cf"/><text x="${bx+4}" y="${top+ph-6}" font-size="10" fill="#536368">Round 2</text><text x="${bx-4}" y="${top+ph-6}" font-size="10" fill="#536368" text-anchor="end">Round 1</text>`;
+  // running best
+  const kept=EXP.filter((e,i)=>B[i]);let d="";
+  kept.forEach((e,i)=>{const x=X(e.x),y=Y(e[m][1]);d+=i?`H${x}V${y}`:`M${x},${y}`});d+=`H${X(N)}`;
+  s+=`<path d="${d}" fill="none" stroke="${KEPT}" stroke-width="2.2" opacity=".85"/>`;
+  // points
+  EXP.forEach((e,i)=>{
+    const x=X(e.x),sel=Fig3.sel===i?" sel":"";
+    if(e.st==="fail"){const y=top+8;s+=`<g class="att${sel}" tabindex="0" data-i="${i}" role="button" aria-label="Experiment ${e.x}, ${e.label}: failed output parity"><rect class="ring" x="${x-6}" y="${y-6}" width="12" height="12" fill="transparent" stroke="none"/><path d="M${x-4},${y-4}L${x+4},${y+4}M${x+4},${y-4}L${x-4},${y+4}" stroke="var(--fail)" stroke-width="2"/></g>`;return}
+    const v=e[m][1],y=Y(v);
+    s+=B[i]
+      ?`<g class="att${sel}" tabindex="0" data-i="${i}" role="button" aria-label="Experiment ${e.x}, ${e.label}: new best, ${fmt(v)} ms"><circle class="ring" cx="${x}" cy="${y}" r="6" fill="${KEPT}" stroke="#202b30" stroke-width="1"/></g>`
+      :`<g class="att${sel}" tabindex="0" data-i="${i}" role="button" aria-label="Experiment ${e.x}, ${e.label}: no improvement, ${fmt(v)} ms"><circle class="ring" cx="${x}" cy="${y}" r="4" fill="#c9cfcd" stroke="none"/></g>`;
+    if(B[i]&&!narrow)s+=e.x>N-3?`<text x="${x-9}" y="${y+4}" font-size="${narrow?10:11}" fill="${KEPT}" text-anchor="end">${e.label}</text>`:`<text transform="translate(${x+7},${y-8}) rotate(-28)" font-size="${narrow?10:11}" fill="${KEPT}">${e.label}</text>`;
+  });
+  wrap.innerHTML=s+`</svg>`;
+  wrap.querySelectorAll(".att").forEach(g=>{const f=()=>Fig3.show(+g.dataset.i);g.addEventListener("click",f);g.addEventListener("focus",f);g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}})});
+};
+Fig3.show=function(i){
+  const e=EXP[i],det=document.getElementById("f3detail");Fig3.sel=i;
+  document.querySelectorAll("#f3wrap .att").forEach(g=>g.classList.toggle("sel",+g.dataset.i===i));
+  if(e.x===0){det.innerHTML=`<b>0 · Original app query</b> · 625 ms · 4,063 ms CPU (median of 5, Round 1 forms block)`;return}
+  if(e.st==="fail"){det.innerHTML=`<b>${e.x} · ${e.label}</b> · Round 1 · <span style="color:var(--fail)">output didn't match, not timed</span>`;return}
+  const ctl=e.s===1?"original":"Round 1 winner",B=Fig3.best(Fig3.metric);
+  det.innerHTML=`<b>${e.x} · ${e.label}</b> · Round ${e.s} · ${B[i]?"new best":"no improvement"} · ${e.n===5?"5-pair confirmation":`pilot, ${e.n} pair${e.n>1?"s":""}`}<br>${fmt(e.el[1])} ms vs ${fmt(e.el[0])} ms ${ctl} · CPU ${fmt(e.cpu[1])} vs ${fmt(e.cpu[0])} ms`;
+};
+function Fig3init(){
+  Fig3.title=()=>{const k=Fig3.best(Fig3.metric).filter((b,i)=>b&&i>0).length;document.getElementById("f3t").textContent=`${EXP.length-1} experiments, ${k} improvements`};
+  document.getElementById("f3legend").innerHTML=`<span><i class="dot" style="background:#c9cfcd"></i>no improvement</span><span style="color:var(--fail)">✕ output mismatch</span><span><i class="dot" style="background:#1f8a5b"></i>new best</span><span><i style="background:#1f8a5b;height:3px"></i>running best</span>`;
+  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{Fig3.metric=b.dataset.m;document.querySelectorAll("[data-m]").forEach(x=>x.setAttribute("aria-pressed",x===b));Fig3.title();Fig3.draw()});
+  document.getElementById("f3table").innerHTML=`<thead><tr><th>#</th><th>Round</th><th>Experiment</th><th>Result (elapsed)</th><th>Pairs</th><th>Elapsed ctl → exp</th><th>CPU ctl → exp</th></tr></thead><tbody>`+
+   EXP.slice(1).map(e=>`<tr><td>${e.x}</td><td>${e.s}</td><td class="left">${e.label}</td><td class="left">${e.st==="fail"?"output mismatch":Fig3.best("el")[e.x]?"new best":"no improvement"}</td><td>${e.st==="fail"?"—":e.n}</td><td>${e.el?fmt(e.el[0])+" → "+fmt(e.el[1]):"—"}</td><td>${e.cpu?fmt(e.cpu[0])+" → "+fmt(e.cpu[1]):"—"}</td></tr>`).join("")+`</tbody>`;
+  document.getElementById("f3cap").innerHTML=`<p>One point per distinct candidate, in order of first attempt, each at its most complete measurement. Excludes the Desktop reference forms and the J9 filtered fixture.</p>`;
+  Fig3.title();Fig3.draw();
+}
+
+const figParam=new URLSearchParams(location.search).get("fig");
+if(figParam&&["1","2","3"].includes(figParam)){
+  document.body.classList.add("embed");
+  ["1","2","3"].forEach(n=>{if(n!==figParam)document.getElementById("fig"+n).hidden=true});
+}
+if(!figParam||figParam==="1")Fig1();
+if(!figParam||figParam==="2")Fig2();
+if(!figParam||figParam==="3")Fig3init();
+if(figParam==="3"){let r3;window.addEventListener("resize",()=>{clearTimeout(r3);r3=setTimeout(()=>Fig3.draw(),120)})}
+</script>
+</body>
+</html>

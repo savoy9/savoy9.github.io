@@ -5,6 +5,7 @@ require "uri"
 class SiteCheck
   ORIGIN = "https://savoy9.github.io"
   QUERY_REDUCTION = "/rayfin-performance-query-reduction/"
+  QUERY_REWRITES = "/rayfin-performance-query-rewrites/"
   OLD_QUERY_REDUCTION = "/same-model-different-workload/"
   ARCHIVED = ["/Dax-Aggregations/", "/Dax-Aggregations-Part-2/"].freeze
   PUBLISHED = {
@@ -13,6 +14,7 @@ class SiteCheck
     "/Dax-Aggregations/" => "2019-02-17",
     "/Dax-Aggregations-Part-2/" => "2019-02-19",
     QUERY_REDUCTION => "2026-11-20",
+    QUERY_REWRITES => "2026-11-25",
     "/404.html" => nil
   }.freeze
   DRAFT_NAMES = %w[

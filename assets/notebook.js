@@ -46,3 +46,39 @@ document.querySelectorAll("pre").forEach((pre, index) => {
   const highlight = pre.closest(".highlight") || pre;
   highlight.before(toolbar);
 });
+
+const lightboxLinks = document.querySelectorAll("a[data-lightbox]");
+if (lightboxLinks.length && typeof HTMLDialogElement !== "undefined") {
+  const dialog = document.createElement("dialog");
+  dialog.className = "lightbox";
+  dialog.innerHTML =
+    '<div class="lightbox-bar"><span class="lightbox-caption"></span><button type="button" class="lightbox-close" aria-label="Close image">Close</button></div>' +
+    '<div class="lightbox-body"><img alt=""></div>';
+  document.body.append(dialog);
+  const img = dialog.querySelector("img");
+  const cap = dialog.querySelector(".lightbox-caption");
+  const closeBtn = dialog.querySelector(".lightbox-close");
+  let trigger = null;
+
+  closeBtn.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+  dialog.addEventListener("close", () => {
+    trigger?.focus();
+    trigger = null;
+  });
+
+  lightboxLinks.forEach((link) => {
+    link.addEventListener("click", (event) => {
+      event.preventDefault();
+      trigger = link;
+      const thumb = link.querySelector("img");
+      img.src = link.href;
+      img.alt = thumb ? thumb.alt : "";
+      cap.textContent = link.dataset.lightbox || (thumb ? thumb.alt : "");
+      dialog.showModal();
+      closeBtn.focus();
+    });
+  });
+}
