@@ -9,7 +9,8 @@
 *{box-sizing:border-box}
 body{margin:0;background:#f3f6f5;color:var(--ink);font:1rem/1.35 system-ui,sans-serif}
 main{max-width:64rem;margin:auto;padding:clamp(.65rem,2.4vw,1.1rem)}
-@media all{body.embed{background:#fff}body.embed main{max-width:none;padding:.65rem .9rem .9rem}}
+body.embed{background:#fff}
+body.embed main{max-width:none;padding:.65rem .9rem .9rem}
 table{width:100%;table-layout:fixed;border-collapse:collapse;background:white;font-size:.88rem}
 col:first-child{width:31%}
 th,td{border:1px solid var(--line);padding:.17rem .5rem;vertical-align:middle}
@@ -29,14 +30,7 @@ tbody tr:nth-child(5)>*,tbody tr:nth-child(12)>*{border-top:2px solid #aebfc2}
 .axis span:last-child{white-space:nowrap}
 .note{display:block;color:var(--accent);font-size:.72rem;font-weight:500;line-height:1.2}
 .note::before{content:"\2022  "}
-.axis,.tracks{margin-right:var(--info-gutter)}
-table{--info-gutter:1.55rem}
-tbody td{position:relative}
 .tracks{display:grid;gap:2px}
-.query-end-label{display:block;color:var(--muted);font-size:.68rem;font-weight:600;line-height:1.15}
-.query-end-label::before{content:"";display:inline-block;width:.8em;margin:0 .25em .2em 0;border-top:1px dashed currentColor}
-.query-end-guide{position:absolute;inset:0 calc(.5rem + var(--info-gutter)) 0 .5rem;pointer-events:none;z-index:1}
-.query-end-guide::after{content:"";position:absolute;top:0;bottom:0;left:var(--query-end);border-left:1px dashed #465963}
 .track{height:1.2rem;position:relative;background:linear-gradient(to right,transparent calc(50% - .5px),#a9bcbf calc(50% - .5px),#a9bcbf calc(50% + .5px),transparent calc(50% + .5px)),#eaf0f0;box-shadow:inset 1px 0 #b5c5c7,inset -1px 0 #b5c5c7}
 .bar{position:absolute;top:25%;height:50%;margin:0;padding:0;border:0;border-radius:2px;background:#286879;cursor:pointer}
 .changed .bar{background:var(--accent)}
@@ -45,7 +39,7 @@ tbody td{position:relative}
 .bar:focus-visible{outline:none}
 .bar:is(:focus-visible,[aria-pressed=true])::before{outline:2px solid #342697;outline-offset:2px;z-index:1}
 .bar.overflow::after{content:"\203A";inset:auto 0 auto auto;line-height:.63rem;min-width:0;width:auto;color:white;background:#723a18;font-weight:800}
-.scan-info{position:absolute;z-index:1;top:50%;left:calc(100% + .15rem);transform:translateY(-50%);width:1.4rem;height:1.2rem;margin:0;padding:0;border:0;border-radius:.2rem;background:transparent;color:#193e51;cursor:pointer}
+.scan-info{position:absolute;z-index:1;top:50%;right:-.5rem;transform:translateY(-50%);width:1.4rem;height:1.2rem;margin:0;padding:0;border:0;border-radius:.2rem;background:transparent;color:#193e51;cursor:pointer}
 .scan-info::before{content:"i";position:absolute;right:2px;top:50%;transform:translateY(-50%);width:.55rem;height:.55rem;border:1px solid #879fa6;border-radius:50%;background:white;font:700 .49rem/.55rem system-ui,sans-serif;text-align:center}
 .scan-info:focus-visible,dialog button:focus-visible,dialog pre:focus-visible{outline:2px solid #342697;outline-offset:2px}
 .tip{position:fixed;z-index:2;max-width:min(23rem,calc(100vw - 1rem));padding:.45rem .6rem;border-radius:.35rem;background:#172630;color:white;font-size:.79rem;box-shadow:0 2px 12px #17263042;pointer-events:none}
@@ -66,7 +60,7 @@ dialog pre{max-height:50vh;margin:.5rem 0 0;padding:.65rem;overflow:auto;white-s
   .axis{font-size:.63rem}
   .axis span:nth-child(2){display:none}
   .note{font-size:.65rem}
-  .query-end-guide{left:.23rem;right:calc(.23rem + var(--info-gutter))}
+  .scan-info{right:-.23rem}
 }
 </style>
 </head>
@@ -84,7 +78,7 @@ dialog pre{max-height:50vh;margin:.5rem 0 0;padding:.65rem;overflow:auto;white-s
       <tr><th scope="row">Day-key list</th><td>Date only</td><td>Date only</td><td>Date only</td></tr>
       <tr><th scope="row">Invoice value<span class="note">R2: drops Year Month; keeps currency</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
       <tr><th scope="row">Budget value<span class="note">R2: drops Year Month from budget sums</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
-      <tr><th scope="row">Invoice count<span class="note">R1: one fewer displayed month-tuple filter. Median scan interval: 87 &rarr; 62 ms across separate cohorts; cause unproven.</span><span class="note">R2: drops Year Month from counts</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">Invoice count<span class="note">R2: drops Year Month from counts</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
       <tr><th scope="row">Returns invoice value<span class="note">R2: drops Year Month; retains returns filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
       <tr><th scope="row">Billed invoice value<span class="note">R2: drops Year Month; retains billed filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
       <tr><th scope="row">On-time invoice count<span class="note">R2: drops Year Month; retains on-time filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
@@ -123,7 +117,6 @@ const familyOrdinals = [
 ];
 const names = ['Original','Round 1','Round 2'];
 const limit = 650;
-const queryEnds = [638.6528,487.983,339.1143];
 const tip = document.querySelector('#tip');
 const dialog = document.querySelector('#scan-dialog');
 const statements = JSON.parse(document.querySelector('#captured-xmsql').textContent);
@@ -216,21 +209,13 @@ document.querySelectorAll('thead th').forEach((header,i)=>{
   const axis = document.createElement('div');
   axis.className='axis';
   axis.innerHTML='<span>0</span><span>325</span><span>650 ms</span>';
-  const endLabel = document.createElement('span');
-  endLabel.className = 'query-end-label';
-  endLabel.textContent = `Query end: ${queryEnds[i-1].toFixed(1)} ms`;
-  endLabel.title = 'Observed QueryEnd timestamp relative to QueryBegin, not the reported duration counter.';
-  header.append(axis,endLabel);
+  header.append(axis);
 });
 document.querySelectorAll('tbody tr').forEach((row,i)=>{
   const family = row.querySelector('th').firstChild.textContent;
   row.querySelectorAll('td').forEach((cell,j)=>{
     const events = familyOrdinals[i][j];
-    const guide = document.createElement('span');
-    guide.className = 'query-end-guide';
-    guide.setAttribute('aria-hidden','true');
-    guide.style.setProperty('--query-end',`${queryEnds[j]/limit*100}%`);
-    if(!events.length){cell.append(guide);return;}
+    if(!events.length)return;
     const tracks = document.createElement('div');
     tracks.className = 'tracks';
     for(const ordinal of events){
@@ -240,7 +225,7 @@ document.querySelectorAll('tbody tr').forEach((row,i)=>{
       lane.append(bar,makeInfo(j,ordinal,family,bar));
       tracks.append(lane);
     }
-    cell.replaceChildren(tracks,guide);
+    cell.replaceChildren(tracks);
   });
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.bar'))clear()});
