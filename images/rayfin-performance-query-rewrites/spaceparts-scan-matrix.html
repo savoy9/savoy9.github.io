@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SpaceParts | Scan families compared</title>
+<style>
+:root{color-scheme:light;--ink:#172630;--muted:#465963;--line:#d7e1e3;--accent:#0f6056;--tint:#e7f4ef}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f6f5;color:var(--ink);font:1rem/1.35 system-ui,sans-serif}
+main{max-width:64rem;margin:auto;padding:clamp(.65rem,2.4vw,1.1rem)}
+body.embed{background:#fff}
+body.embed main{max-width:none;padding:.65rem .9rem .9rem}
+table{width:100%;table-layout:fixed;border-collapse:collapse;background:white;font-size:.88rem}
+col:first-child{width:31%}
+th,td{border:1px solid var(--line);padding:.17rem .5rem;vertical-align:middle}
+thead th{background:#e8eff0;text-align:center}
+thead th:first-child,tbody th{text-align:left}
+thead th:last-child{background:var(--tint)}
+thead small{display:block;color:var(--muted);font-size:.75em;font-weight:500;white-space:nowrap}
+td{text-align:center}
+tbody th{font-weight:620}
+tbody tr:nth-child(even){background:#f8faf9}
+tbody tr:nth-child(5)>*,tbody tr:nth-child(12)>*{border-top:2px solid #aebfc2}
+.changed{background:var(--tint);color:var(--accent);font-weight:730}
+.absent{color:var(--muted)}
+.axis{display:grid;grid-template-columns:repeat(3,1fr);margin-top:.25rem;color:var(--muted);font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums}
+.axis span:first-child{justify-self:start}
+.axis span:last-child{grid-column:3;justify-self:end}
+.axis span:last-child{white-space:nowrap}
+.note{display:block;color:var(--accent);font-size:.72rem;font-weight:500;line-height:1.2}
+.note::before{content:"\2022  "}
+.tracks{display:grid;gap:2px}
+.track{height:1.2rem;position:relative;background:linear-gradient(to right,transparent calc(50% - .5px),#a9bcbf calc(50% - .5px),#a9bcbf calc(50% + .5px),transparent calc(50% + .5px)),#eaf0f0;box-shadow:inset 1px 0 #b5c5c7,inset -1px 0 #b5c5c7}
+.bar{position:absolute;top:25%;height:50%;margin:0;padding:0;border:0;border-radius:2px;background:#286879;cursor:pointer}
+.changed .bar{background:var(--accent)}
+.bar::before{content:"";position:absolute;inset:-1px auto -1px 0;width:100%;min-width:2px;border-radius:2px;background:inherit}
+.bar::after{content:"";position:absolute;inset:-2px auto -2px 0;width:100%;min-width:16px}
+.bar:focus-visible{outline:none}
+.bar:is(:focus-visible,[aria-pressed=true])::before{outline:2px solid #342697;outline-offset:2px;z-index:1}
+.bar.overflow::after{content:"\203A";inset:auto 0 auto auto;line-height:.63rem;min-width:0;width:auto;color:white;background:#723a18;font-weight:800}
+.scan-info{position:absolute;z-index:1;top:50%;right:-.5rem;transform:translateY(-50%);width:1.4rem;height:1.2rem;margin:0;padding:0;border:0;border-radius:.2rem;background:transparent;color:#193e51;cursor:pointer}
+.scan-info::before{content:"i";position:absolute;right:2px;top:50%;transform:translateY(-50%);width:.55rem;height:.55rem;border:1px solid #879fa6;border-radius:50%;background:white;font:700 .49rem/.55rem system-ui,sans-serif;text-align:center}
+.scan-info:focus-visible,dialog button:focus-visible,dialog pre:focus-visible{outline:2px solid #342697;outline-offset:2px}
+.tip{position:fixed;z-index:2;max-width:min(23rem,calc(100vw - 1rem));padding:.45rem .6rem;border-radius:.35rem;background:#172630;color:white;font-size:.79rem;box-shadow:0 2px 12px #17263042;pointer-events:none}
+dialog{width:min(46rem,calc(100vw - 1.5rem));max-height:calc(100vh - 1.5rem);border:1px solid #879fa6;border-radius:.6rem;padding:1rem;color:var(--ink);background:white}
+dialog::backdrop{background:#17263077}
+.dialog-heading{display:flex;align-items:start;justify-content:space-between;gap:.8rem}
+.dialog-heading h2{margin:0;font-size:1.05rem}
+.dialog-heading button{font:inherit;cursor:pointer}
+dialog p{margin:.5rem 0;color:var(--muted);font-size:.83rem}
+dialog pre{max-height:50vh;margin:.5rem 0 0;padding:.65rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f5;font-size:.84rem;line-height:1.4}
+.scan-nav{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.7rem;font-size:.85rem}
+.scan-nav button{min-height:2rem;font:inherit;cursor:pointer}
+.scan-nav button:disabled{cursor:default}
+@media(max-width:36rem){
+  col:first-child{width:32%}
+  table{font-size:.78rem;line-height:1.25}
+  th,td{padding:.22rem .23rem;overflow-wrap:break-word}
+  .axis{font-size:.63rem}
+  .axis span:nth-child(2){display:none}
+  .note{font-size:.65rem}
+  .scan-info{right:-.23rem}
+}
+</style>
+</head>
+<body>
+<main>
+  <table aria-label="SpaceParts outer scan timing by family, same default fixture in separate cohorts">
+    <colgroup><col><col><col><col></colgroup>
+    <thead>
+      <tr><th scope="col">Scan family</th><th scope="col">Original<small>13 outer</small></th><th scope="col">Round 1<small>12 outer</small></th><th scope="col">Round 2<small>13 outer</small></th></tr>
+    </thead>
+    <tbody>
+      <tr><th scope="row">Window anchor</th><td>Latest complete month</td><td>Latest complete month</td><td>Latest complete month</td></tr>
+      <tr><th scope="row">Display axis<span class="note">R1: one fewer callback scan</span><span class="note">R2: key list replaces callbacks</span></th><td>2 callback scans</td><td>1 callback scan</td><td class="changed">1 key-list scan</td></tr>
+      <tr><th scope="row">Key-only axis<span class="note">R2: added Month Start scan</span></th><td class="absent">&mdash;</td><td class="absent">&mdash;</td><td class="changed">1 added scan</td></tr>
+      <tr><th scope="row">Day-key list</th><td>Date only</td><td>Date only</td><td>Date only</td></tr>
+      <tr><th scope="row">Invoice value<span class="note">R2: drops Year Month; keeps currency</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">Budget value<span class="note">R2: drops Year Month from budget sums</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">Invoice count<span class="note">R2: drops Year Month from counts</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">Returns invoice value<span class="note">R2: drops Year Month; retains returns filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">Billed invoice value<span class="note">R2: drops Year Month; retains billed filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">On-time invoice count<span class="note">R2: drops Year Month; retains on-time filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">Billed invoice count<span class="note">R2: drops Year Month; retains billed filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">Rate lookups</th><td><strong>2</strong> &times; max by currency</td><td><strong>2</strong> &times; max by currency</td><td><strong>2</strong> &times; max by currency</td></tr>
+    </tbody>
+  </table>
+</main>
+<div class="tip" id="tip" aria-hidden="true" hidden></div>
+<dialog id="scan-dialog" aria-labelledby="scan-title" aria-describedby="scan-redaction">
+  <div class="dialog-heading">
+    <h2 id="scan-title">Captured xmSQL</h2>
+    <form method="dialog"><button autofocus>Close</button></form>
+  </div>
+  <p id="scan-metrics"></p>
+  <p id="scan-redaction">Captured statement, formatted for readability. Internal object IDs were removed; sample values and engine abbreviations are shown as captured.</p>
+  <pre tabindex="0" aria-label="Captured xmSQL statement"><code id="scan-sql"></code></pre>
+  <nav class="scan-nav" aria-label="Scans in start-time order">
+    <button id="scan-prev" type="button">Previous</button>
+    <span id="scan-index" aria-live="polite"></span>
+    <button id="scan-next" type="button">Next</button>
+  </nav>
+</dialog>
+<script type="application/json" id="captured-xmsql">[["SET DC_KIND=\"AUTO\";\nSELECT  MAX([Date].[Month Start]) AS [$Measure0]\nFROM [Date]\nWHERE   PFCAST( [Date].[Is Complete Billing Month] AS  INT );","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start]\nFROM [Trend Date]\nWHERE   (PFCASTCOALESCE( [Trend Date].[Month Start] AS  REAL ) \u003e= COALESCE([CallbackDataID(\u003cccon\u003eWindowStart\u003c/ccon\u003e)]()))\n  VAND   (PFCASTCOALESCE( [Trend Date].[Month Start] AS  REAL ) \u003c= COALESCE([CallbackDataID(\u003cccon\u003eWindowEnd\u003c/ccon\u003e)]()));","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start]\nFROM [Trend Date]\nWHERE   (PFCASTCOALESCE( [Trend Date].[Month Start] AS  REAL ) \u003e= COALESCE([CallbackDataID(\u003cccon\u003eWindowStart\u003c/ccon\u003e)]()))\n  VAND   (PFCASTCOALESCE( [Trend Date].[Month Start] AS  REAL ) \u003c= COALESCE([CallbackDataID(\u003cccon\u003eWindowEnd\u003c/ccon\u003e)]()));","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Date] AS [Trend Date (55)$Date]\nFROM [Trend Date];","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency],  MAX([Budget Rate].[Rate]) AS [$Measure0]\nFROM [Budget Rate];","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Budget].[Total Budget]) AS [$Measure0]\nFROM [Budget]\nLEFT OUTER JOIN [Trend Date]\n  ON [Budget].[Budget Month]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('YW', 'YR')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency],  MAX([Budget Rate].[Rate]) AS [$Measure0]\nFROM [Budget Rate];","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   PFCAST( [Invoices].[OTD Indicator] AS  INT );","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};"],["SET DC_KIND=\"AUTO\";\nSELECT  MAX([Date].[Month Start]) AS [$Measure0]\nFROM [Date]\nWHERE   PFCAST( [Date].[Is Complete Billing Month] AS  INT );","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start]\nFROM [Trend Date]\nWHERE   (PFCASTCOALESCE( [Trend Date].[Month Start] AS  REAL ) \u003e= COALESCE([CallbackDataID(\u003cccon\u003eWindowStart\u003c/ccon\u003e)]()))\n  VAND   (PFCASTCOALESCE( [Trend Date].[Month Start] AS  REAL ) \u003c= COALESCE([CallbackDataID(\u003cccon\u003eWindowEnd\u003c/ccon\u003e)]()));","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Date] AS [Trend Date (55)$Date]\nFROM [Trend Date];","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency],  MAX([Budget Rate].[Rate]) AS [$Measure0]\nFROM [Budget Rate];","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Budget].[Total Budget]) AS [$Measure0]\nFROM [Budget]\nLEFT OUTER JOIN [Trend Date]\n  ON [Budget].[Budget Month]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('YW', 'YR')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency],  MAX([Budget Rate].[Rate]) AS [$Measure0]\nFROM [Budget Rate];","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]}\n  VAND   PFCAST( [Invoices].[OTD Indicator] AS  INT );","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   ([Trend Date].[Year Month], [Trend Date].[Month Start]) IN {('2021-05', 44317.000000), ('2021-11', 44501.000000), ('2021-07', 44378.000000), ('2021-08', 44409.000000), ('2021-03', 44256.000000), ('2021-10', 44470.000000), ('2022-02', 44593.000000), ('2020-12', 44166.000000), ('2022-07', 44743.000000), ('2021-09', 44440.000000)...[24 total tuples, not all displayed]};"],["SET DC_KIND=\"AUTO\";\nSELECT  MAX([Date].[Month Start]) AS [$Measure0]\nFROM [Date]\nWHERE   PFCAST( [Date].[Is Complete Billing Month] AS  INT );","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Year Month] AS [Trend Date (55)$Year Month], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start]\nFROM [Trend Date]\nWHERE   [Trend Date].[Month Start] IN (44501.000000, 44713.000000, 44228.000000, 44256.000000, 44044.000000, 44348.000000, 44593.000000, 44378.000000, 44136.000000, 44562.000000...[24 total values, not all displayed]);","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Month Start] AS [Trend Date (55)$Month Start]\nFROM [Trend Date]\nWHERE   [Trend Date].[Month Start] IN (44501.000000, 44713.000000, 44228.000000, 44256.000000, 44044.000000, 44348.000000, 44593.000000, 44378.000000, 44136.000000, 44562.000000...[24 total values, not all displayed]);","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Date] AS [Trend Date (55)$Date]\nFROM [Trend Date];","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   [Trend Date].[Month Start] IN (44713.000000, 44501.000000, 44228.000000, 44256.000000, 44593.000000, 44348.000000, 44044.000000, 44378.000000, 44562.000000, 44136.000000...[24 total values, not all displayed]);","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency],  MAX([Budget Rate].[Rate]) AS [$Measure0]\nFROM [Budget Rate];","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Budget].[Total Budget]) AS [$Measure0]\nFROM [Budget]\nLEFT OUTER JOIN [Trend Date]\n  ON [Budget].[Budget Month]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   [Trend Date].[Month Start] IN (44713.000000, 44501.000000, 44228.000000, 44256.000000, 44593.000000, 44348.000000, 44044.000000, 44378.000000, 44562.000000, 44136.000000...[24 total values, not all displayed]);","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   [Trend Date].[Month Start] IN (44713.000000, 44501.000000, 44228.000000, 44256.000000, 44593.000000, 44348.000000, 44044.000000, 44378.000000, 44562.000000, 44136.000000...[24 total values, not all displayed]);","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('YW', 'YR')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   [Trend Date].[Month Start] IN (44713.000000, 44501.000000, 44228.000000, 44256.000000, 44593.000000, 44348.000000, 44044.000000, 44378.000000, 44562.000000, 44136.000000...[24 total values, not all displayed]);","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency],  MAX([Budget Rate].[Rate]) AS [$Measure0]\nFROM [Budget Rate];","SET DC_KIND=\"AUTO\";\nSELECT  [Budget Rate].[From Currency] AS [Budget Rate (16)$From Currency], [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  SUM([Invoices].[Net Invoice Value]) AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Budget Rate]\n  ON [Invoices].[Local Currency]=[Budget Rate].[From Currency]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   [Trend Date].[Month Start] IN (44713.000000, 44501.000000, 44228.000000, 44256.000000, 44593.000000, 44348.000000, 44044.000000, 44378.000000, 44562.000000, 44136.000000...[24 total values, not all displayed]);","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   [Trend Date].[Month Start] IN (44713.000000, 44501.000000, 44228.000000, 44256.000000, 44593.000000, 44348.000000, 44044.000000, 44378.000000, 44562.000000, 44136.000000...[24 total values, not all displayed])\n  VAND   PFCAST( [Invoices].[OTD Indicator] AS  INT );","SET DC_KIND=\"AUTO\";\nSELECT  [Trend Date].[Month Start] AS [Trend Date (55)$Month Start],  COUNT() AS [$Measure0]\nFROM [Invoices]\nLEFT OUTER JOIN [Invoice Document Type]\n  ON [Invoices].[Billing Document Type Code]=[Invoice Document Type].[Billing Document Type Code]\nLEFT OUTER JOIN [Trend Date]\n  ON [Invoices].[Billing Date]=[Trend Date].[Date]\nWHERE   [Invoice Document Type].[Billing Document Type Code] IN ('F2', 'L2')\n  VAND   [Trend Date].[Date] IN (44121.000000, 44230.000000, 44731.000000, 44282.000000, 44062.000000, 44563.000000, 44367.000000, 44173.000000, 44674.000000, 44478.000000...[730 total values, not all displayed])\n  VAND   [Trend Date].[Month Start] IN (44713.000000, 44501.000000, 44228.000000, 44256.000000, 44593.000000, 44348.000000, 44044.000000, 44378.000000, 44562.000000, 44136.000000...[24 total values, not all displayed]);"]]</script>
+<script>
+// [start offset, end offset, end-event duration, end-event CPU], ordered by begin time.
+const observations = [
+  [[22.26,22.6956,0,0],[24.8729,25.3307,0,0],[27.5392,28.1967,0,0],[29.4634,29.826,0,0],[34.9161,142.7618,109,859],[146.667,147.0899,0,0],[151.9486,186.4164,31,63],[191.3451,285.7943,94,688],[292.7264,318.2888,16,125],[322.166,322.2076,0,0],[327.6661,435.1236,110,813],[442.8966,546.183,99,750],[551.4415,635.2609,94,734]],
+  [[19.1247,19.4362,0,0],[21.5279,21.8902,0,0],[23.2242,23.5258,0,0],[28.0107,106.0581,78,672],[109.5194,109.8907,0,0],[114.4256,141.2363,31,63],[145.4352,197.2303,47,438],[203.0865,230.8176,16,78],[234.5214,234.5603,0,0],[239.7963,336.0095,94,672],[342.7557,408.6694,62,438],[413.3609,484.9712,78,531]],
+  [[19.3065,19.6353,0,0],[21.8137,22.2539,16,16],[23.6475,23.9396,0,0],[25.0281,25.3394,0,0],[29.2784,77.6069,47,375],[80.5432,80.8619,0,0],[84.3783,117.288,47,63],[121.0921,148.8258,31,156],[154.1212,174.7077,16,109],[177.5301,177.5672,0,0],[182.1297,242.7386,63,406],[248.5415,288.2592,47,359],[292.226,335.8015,47,281]]
+];
+const familyOrdinals = [
+  [[1],[1],[1]], [[2,3],[2],[2]], [[],[],[3]], [[4],[3],[4]],
+  [[5],[4],[5]], [[7],[6],[7]], [[8],[7],[8]], [[9],[8],[9]],
+  [[11],[10],[11]], [[12],[11],[12]], [[13],[12],[13]], [[6,10],[5,9],[6,10]]
+];
+const names = ['Original','Round 1','Round 2'];
+const limit = 650;
+const tip = document.querySelector('#tip');
+const dialog = document.querySelector('#scan-dialog');
+const statements = JSON.parse(document.querySelector('#captured-xmsql').textContent);
+const scanDetails = observations.map(()=>[]);
+const prev = document.querySelector('#scan-prev');
+const next = document.querySelector('#scan-next');
+let pinned = null;
+let dialogTrigger = null;
+let scanColumn = 0;
+let scanOrdinal = 1;
+function show(button){
+  tip.textContent = button.getAttribute('aria-label');
+  tip.hidden = false;
+  const b = button.getBoundingClientRect();
+  const x = Math.max(8,Math.min(innerWidth-tip.offsetWidth-8,b.left));
+  const y = b.top >= tip.offsetHeight+12 ? b.top-tip.offsetHeight-8 : b.bottom+8;
+  tip.style.left = `${x}px`;
+  tip.style.top = `${y}px`;
+}
+function clear(){
+  if(pinned)pinned.setAttribute('aria-pressed','false');
+  pinned = null;
+  tip.hidden = true;
+}
+function makeBar(column,ordinal,family){
+  const [start,end,duration,cpu] = observations[column][ordinal-1];
+  const button = document.createElement('button');
+  const overflow = end > limit;
+  button.type = 'button';
+  button.className = overflow ? 'bar overflow' : 'bar';
+  button.style.left = `${start >= limit ? 98 : start/limit*100}%`;
+  button.style.width = `${start >= limit ? 2 : (Math.min(end,limit)-start)/limit*100}%`;
+  button.setAttribute('aria-pressed','false');
+  button.setAttribute('aria-label',`${names[column]} scan ${ordinal}, ${family}. ${start.toFixed(4)} to ${end.toFixed(4)} ms from QueryBegin; ${duration} ms end duration; ${cpu} ms end CPU.${overflow?' Extends beyond the 650 ms axis.':''}`);
+  button.addEventListener('mouseenter',()=>{if(!pinned)show(button)});
+  button.addEventListener('mouseleave',()=>{if(!pinned && document.activeElement!==button)tip.hidden=true});
+  button.addEventListener('focus',()=>{if(pinned!==button)clear();show(button)});
+  button.addEventListener('blur',()=>{if(!pinned)tip.hidden=true});
+  button.addEventListener('click',()=>{
+    const wasPinned = pinned===button;
+    clear();
+    if(!wasPinned){pinned=button;button.setAttribute('aria-pressed','true');show(button)}
+  });
+  return button;
+}
+function makeInfo(column,ordinal,family,bar){
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'scan-info';
+  scanDetails[column][ordinal-1] = {family, metrics:bar.getAttribute('aria-label')};
+  button.setAttribute('aria-label',`${names[column]} scan ${ordinal}, ${family}: show captured xmSQL`);
+  button.setAttribute('aria-haspopup','dialog');
+  button.setAttribute('aria-controls',dialog.id);
+  button.addEventListener('click',()=>{
+    clear();
+    dialogTrigger = button;
+    scanColumn = column;
+    scanOrdinal = ordinal;
+    renderScan();
+    dialog.showModal();
+  });
+  return button;
+}
+function renderScan(){
+  const {family,metrics} = scanDetails[scanColumn][scanOrdinal-1];
+  const total = observations[scanColumn].length;
+  document.querySelector('#scan-title').textContent = `${names[scanColumn]} scan ${scanOrdinal} · ${family}`;
+  document.querySelector('#scan-metrics').textContent = metrics;
+  document.querySelector('#scan-sql').textContent = statements[scanColumn][scanOrdinal-1];
+  document.querySelector('#scan-index').textContent = `Scan ${scanOrdinal} of ${total}`;
+  dialog.querySelector('pre').scrollTop = 0;
+  prev.disabled = scanOrdinal === 1;
+  next.disabled = scanOrdinal === total;
+}
+function stepScan(delta,button,other){
+  if(button.disabled)return;
+  scanOrdinal += delta;
+  renderScan();
+  if(button.disabled)other.focus();
+}
+prev.addEventListener('click',()=>stepScan(-1,prev,next));
+next.addEventListener('click',()=>stepScan(1,next,prev));
+dialog.addEventListener('close',()=>{
+  dialogTrigger?.focus({preventScroll:true});
+  dialogTrigger = null;
+});
+if(new URLSearchParams(location.search).get('embed')==='1')document.body.classList.add('embed');
+document.querySelectorAll('thead th').forEach((header,i)=>{
+  if(!i)return;
+  const axis = document.createElement('div');
+  axis.className='axis';
+  axis.innerHTML='<span>0</span><span>325</span><span>650 ms</span>';
+  header.append(axis);
+});
+document.querySelectorAll('tbody tr').forEach((row,i)=>{
+  const family = row.querySelector('th').firstChild.textContent;
+  row.querySelectorAll('td').forEach((cell,j)=>{
+    const events = familyOrdinals[i][j];
+    if(!events.length)return;
+    const tracks = document.createElement('div');
+    tracks.className = 'tracks';
+    for(const ordinal of events){
+      const lane = document.createElement('div');
+      lane.className = 'track';
+      const bar = makeBar(j,ordinal,family);
+      lane.append(bar,makeInfo(j,ordinal,family,bar));
+      tracks.append(lane);
+    }
+    cell.replaceChildren(tracks);
+  });
+});
+document.addEventListener('click',e=>{if(!e.target.closest('.bar'))clear()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')clear()});
+window.addEventListener('resize',clear);
+window.addEventListener('scroll',clear,{passive:true});
+</script>
+</body>
+</html>
