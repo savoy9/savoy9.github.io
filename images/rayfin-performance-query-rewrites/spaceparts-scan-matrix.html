@@ -30,7 +30,13 @@ tbody tr:nth-child(5)>*,tbody tr:nth-child(12)>*{border-top:2px solid #aebfc2}
 .axis span:last-child{white-space:nowrap}
 .note{display:block;color:var(--accent);font-size:.72rem;font-weight:500;line-height:1.2}
 .note::before{content:"\2022  "}
+tbody th{position:relative;padding-right:2rem}
+tbody td{position:relative}
 .tracks{display:grid;gap:2px}
+.query-end-label{display:block;color:var(--muted);font-size:.68rem;font-weight:600;line-height:1.15}
+.query-end-label::before{content:"";display:inline-block;width:.8em;margin:0 .25em .2em 0;border-top:1px dashed currentColor}
+.query-end-guide{position:absolute;inset:0 .5rem;pointer-events:none;z-index:1}
+.query-end-guide::after{content:"";position:absolute;top:0;bottom:0;left:var(--query-end);border-left:1px dashed #465963}
 .track{height:1.2rem;position:relative;background:linear-gradient(to right,transparent calc(50% - .5px),#a9bcbf calc(50% - .5px),#a9bcbf calc(50% + .5px),transparent calc(50% + .5px)),#eaf0f0;box-shadow:inset 1px 0 #b5c5c7,inset -1px 0 #b5c5c7}
 .bar{position:absolute;top:25%;height:50%;margin:0;padding:0;border:0;border-radius:2px;background:#286879;cursor:pointer}
 .changed .bar{background:var(--accent)}
@@ -39,17 +45,25 @@ tbody tr:nth-child(5)>*,tbody tr:nth-child(12)>*{border-top:2px solid #aebfc2}
 .bar:focus-visible{outline:none}
 .bar:is(:focus-visible,[aria-pressed=true])::before{outline:2px solid #342697;outline-offset:2px;z-index:1}
 .bar.overflow::after{content:"\203A";inset:auto 0 auto auto;line-height:.63rem;min-width:0;width:auto;color:white;background:#723a18;font-weight:800}
-.scan-info{position:absolute;z-index:1;top:50%;right:-.5rem;transform:translateY(-50%);width:1.4rem;height:1.2rem;margin:0;padding:0;border:0;border-radius:.2rem;background:transparent;color:#193e51;cursor:pointer}
-.scan-info::before{content:"i";position:absolute;right:2px;top:50%;transform:translateY(-50%);width:.55rem;height:.55rem;border:1px solid #879fa6;border-radius:50%;background:white;font:700 .49rem/.55rem system-ui,sans-serif;text-align:center}
+.scan-info{position:absolute;top:50%;right:.2rem;transform:translateY(-50%);width:1.6rem;height:1.5rem;margin:0;padding:0;border:0;border-radius:.2rem;background:transparent;color:#193e51;cursor:pointer}
+.scan-info::before{content:"i";display:inline-block;width:.58rem;height:.58rem;border:1px solid #879fa6;border-radius:50%;background:white;font:700 .5rem/.58rem system-ui,sans-serif;text-align:center}
 .scan-info:focus-visible,dialog button:focus-visible,dialog pre:focus-visible{outline:2px solid #342697;outline-offset:2px}
 .tip{position:fixed;z-index:2;max-width:min(23rem,calc(100vw - 1rem));padding:.45rem .6rem;border-radius:.35rem;background:#172630;color:white;font-size:.79rem;box-shadow:0 2px 12px #17263042;pointer-events:none}
-dialog{width:min(46rem,calc(100vw - 1.5rem));max-height:calc(100vh - 1.5rem);border:1px solid #879fa6;border-radius:.6rem;padding:1rem;color:var(--ink);background:white}
+dialog{width:min(85rem,calc(100vw - 1.5rem));max-height:calc(100vh - 1.5rem);border:1px solid #879fa6;border-radius:.6rem;padding:1rem;color:var(--ink);background:white}
 dialog::backdrop{background:#17263077}
 .dialog-heading{display:flex;align-items:start;justify-content:space-between;gap:.8rem}
 .dialog-heading h2{margin:0;font-size:1.05rem}
 .dialog-heading button{font:inherit;cursor:pointer}
 dialog p{margin:.5rem 0;color:var(--muted);font-size:.83rem}
-dialog pre{max-height:50vh;margin:.5rem 0 0;padding:.65rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f5;font-size:.84rem;line-height:1.4}
+.comparison-scroll{overflow:auto}
+.scan-comparison{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start;gap:.65rem;min-width:42rem}
+.scan-column{min-width:0;border:1px solid var(--line);border-radius:.35rem}
+.scan-column h3{margin:0;padding:.4rem .65rem;background:#e8eff0;font-size:.9rem}
+.scan-column:last-child h3{background:var(--tint)}
+.scan-entry{margin:0;padding:.45rem .65rem .6rem;border-top:1px solid var(--line)}
+.scan-entry figcaption{font-size:.76rem;font-weight:650}
+.scan-column p{margin:.5rem .65rem}
+dialog pre{max-height:38vh;margin:.3rem 0 0;padding:.55rem;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#f3f6f5;font-size:.79rem;line-height:1.4}
 .scan-nav{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-top:.7rem;font-size:.85rem}
 .scan-nav button{min-height:2rem;font:inherit;cursor:pointer}
 .scan-nav button:disabled{cursor:default}
@@ -60,7 +74,9 @@ dialog pre{max-height:50vh;margin:.5rem 0 0;padding:.65rem;overflow:auto;white-s
   .axis{font-size:.63rem}
   .axis span:nth-child(2){display:none}
   .note{font-size:.65rem}
-  .scan-info{right:-.23rem}
+  tbody th{padding-right:1.65rem}
+  .scan-info{right:0}
+  .query-end-guide{left:.23rem;right:.23rem}
 }
 </style>
 </head>
@@ -78,7 +94,7 @@ dialog pre{max-height:50vh;margin:.5rem 0 0;padding:.65rem;overflow:auto;white-s
       <tr><th scope="row">Day-key list</th><td>Date only</td><td>Date only</td><td>Date only</td></tr>
       <tr><th scope="row">Invoice value<span class="note">R2: drops Year Month; keeps currency</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
       <tr><th scope="row">Budget value<span class="note">R2: drops Year Month from budget sums</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
-      <tr><th scope="row">Invoice count<span class="note">R2: drops Year Month from counts</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
+      <tr><th scope="row">Invoice count<span class="note">R1: one fewer displayed month-tuple filter</span><span class="note">R2: drops Year Month from counts</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
       <tr><th scope="row">Returns invoice value<span class="note">R2: drops Year Month; retains returns filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
       <tr><th scope="row">Billed invoice value<span class="note">R2: drops Year Month; retains billed filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
       <tr><th scope="row">On-time invoice count<span class="note">R2: drops Year Month; retains on-time filter</span></th><td>Label + key</td><td>Label + key</td><td class="changed">Key only</td></tr>
@@ -93,10 +109,11 @@ dialog pre{max-height:50vh;margin:.5rem 0 0;padding:.65rem;overflow:auto;white-s
     <h2 id="scan-title">Captured xmSQL</h2>
     <form method="dialog"><button autofocus>Close</button></form>
   </div>
-  <p id="scan-metrics"></p>
-  <p id="scan-redaction">Captured statement, formatted for readability. Internal object IDs were removed; sample values and engine abbreviations are shown as captured.</p>
-  <pre tabindex="0" aria-label="Captured xmSQL statement"><code id="scan-sql"></code></pre>
-  <nav class="scan-nav" aria-label="Scans in start-time order">
+  <p id="scan-redaction">Captured statements by query. Repeated scans are listed separately in start order. Sample values and engine abbreviations are shown as captured.</p>
+  <div class="comparison-scroll" tabindex="0" aria-label="Side-by-side xmSQL comparison; scroll horizontally on narrow screens">
+    <div id="scan-comparison" class="scan-comparison"></div>
+  </div>
+  <nav class="scan-nav" aria-label="Scan-family navigation">
     <button id="scan-prev" type="button">Previous</button>
     <span id="scan-index" aria-live="polite"></span>
     <button id="scan-next" type="button">Next</button>
@@ -117,16 +134,17 @@ const familyOrdinals = [
 ];
 const names = ['Original','Round 1','Round 2'];
 const limit = 650;
+const queryEnds = [638.6528,487.983,339.1143];
 const tip = document.querySelector('#tip');
 const dialog = document.querySelector('#scan-dialog');
 const statements = JSON.parse(document.querySelector('#captured-xmsql').textContent);
-const scanDetails = observations.map(()=>[]);
+const comparison = document.querySelector('#scan-comparison');
+const familyLabels = [];
 const prev = document.querySelector('#scan-prev');
 const next = document.querySelector('#scan-next');
 let pinned = null;
 let dialogTrigger = null;
-let scanColumn = 0;
-let scanOrdinal = 1;
+let familyIndex = 0;
 function show(button){
   tip.textContent = button.getAttribute('aria-label');
   tip.hidden = false;
@@ -162,43 +180,65 @@ function makeBar(column,ordinal,family){
   });
   return button;
 }
-function makeInfo(column,ordinal,family,bar){
+function makeInfo(index,family){
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'scan-info';
-  scanDetails[column][ordinal-1] = {family, metrics:bar.getAttribute('aria-label')};
-  button.setAttribute('aria-label',`${names[column]} scan ${ordinal}, ${family}: show captured xmSQL`);
+  button.setAttribute('aria-label',`${family}: compare captured xmSQL`);
   button.setAttribute('aria-haspopup','dialog');
   button.setAttribute('aria-controls',dialog.id);
   button.addEventListener('click',()=>{
     clear();
     dialogTrigger = button;
-    scanColumn = column;
-    scanOrdinal = ordinal;
-    renderScan();
+    familyIndex = index;
+    renderFamily();
     dialog.showModal();
   });
   return button;
 }
-function renderScan(){
-  const {family,metrics} = scanDetails[scanColumn][scanOrdinal-1];
-  const total = observations[scanColumn].length;
-  document.querySelector('#scan-title').textContent = `${names[scanColumn]} scan ${scanOrdinal} · ${family}`;
-  document.querySelector('#scan-metrics').textContent = metrics;
-  document.querySelector('#scan-sql').textContent = statements[scanColumn][scanOrdinal-1];
-  document.querySelector('#scan-index').textContent = `Scan ${scanOrdinal} of ${total}`;
-  dialog.querySelector('pre').scrollTop = 0;
-  prev.disabled = scanOrdinal === 1;
-  next.disabled = scanOrdinal === total;
+function renderFamily(){
+  const total = familyOrdinals.length;
+  document.querySelector('#scan-title').textContent = `${familyLabels[familyIndex]} · xmSQL`;
+  comparison.replaceChildren(...familyOrdinals[familyIndex].map((ordinals,column)=>{
+    const section = document.createElement('section');
+    section.className = 'scan-column';
+    const heading = document.createElement('h3');
+    heading.textContent = names[column];
+    section.append(heading);
+    if(!ordinals.length){
+      const empty = document.createElement('p');
+      empty.textContent = 'No scan in this query.';
+      section.append(empty);
+    }
+    for(const ordinal of ordinals){
+      const entry = document.createElement('figure');
+      entry.className = 'scan-entry';
+      const caption = document.createElement('figcaption');
+      caption.textContent = `Scan ${ordinal}`;
+      const pre = document.createElement('pre');
+      pre.tabIndex = 0;
+      pre.setAttribute('aria-label',`${names[column]} scan ${ordinal} captured xmSQL`);
+      const code = document.createElement('code');
+      code.textContent = statements[column][ordinal-1];
+      pre.append(code);
+      entry.append(caption,pre);
+      section.append(entry);
+    }
+    return section;
+  }));
+  comparison.parentElement.scrollLeft = 0;
+  document.querySelector('#scan-index').textContent = `Family ${familyIndex+1} of ${total}`;
+  prev.disabled = familyIndex === 0;
+  next.disabled = familyIndex === total-1;
 }
-function stepScan(delta,button,other){
+function stepFamily(delta,button,other){
   if(button.disabled)return;
-  scanOrdinal += delta;
-  renderScan();
+  familyIndex += delta;
+  renderFamily();
   if(button.disabled)other.focus();
 }
-prev.addEventListener('click',()=>stepScan(-1,prev,next));
-next.addEventListener('click',()=>stepScan(1,next,prev));
+prev.addEventListener('click',()=>stepFamily(-1,prev,next));
+next.addEventListener('click',()=>stepFamily(1,next,prev));
 dialog.addEventListener('close',()=>{
   dialogTrigger?.focus({preventScroll:true});
   dialogTrigger = null;
@@ -209,23 +249,33 @@ document.querySelectorAll('thead th').forEach((header,i)=>{
   const axis = document.createElement('div');
   axis.className='axis';
   axis.innerHTML='<span>0</span><span>325</span><span>650 ms</span>';
-  header.append(axis);
+  const endLabel = document.createElement('span');
+  endLabel.className = 'query-end-label';
+  endLabel.textContent = `Query end: ${queryEnds[i-1].toFixed(1)} ms`;
+  endLabel.title = 'Observed QueryEnd timestamp relative to QueryBegin, not the reported duration counter.';
+  header.append(axis,endLabel);
 });
 document.querySelectorAll('tbody tr').forEach((row,i)=>{
-  const family = row.querySelector('th').firstChild.textContent;
+  const heading = row.querySelector('th');
+  const family = heading.firstChild.textContent;
+  familyLabels.push(family);
+  heading.append(makeInfo(i,family));
   row.querySelectorAll('td').forEach((cell,j)=>{
     const events = familyOrdinals[i][j];
-    if(!events.length)return;
+    const guide = document.createElement('span');
+    guide.className = 'query-end-guide';
+    guide.setAttribute('aria-hidden','true');
+    guide.style.setProperty('--query-end',`${queryEnds[j]/limit*100}%`);
+    if(!events.length){cell.append(guide);return;}
     const tracks = document.createElement('div');
     tracks.className = 'tracks';
     for(const ordinal of events){
       const lane = document.createElement('div');
       lane.className = 'track';
-      const bar = makeBar(j,ordinal,family);
-      lane.append(bar,makeInfo(j,ordinal,family,bar));
+      lane.append(makeBar(j,ordinal,family));
       tracks.append(lane);
     }
-    cell.replaceChildren(tracks);
+    cell.replaceChildren(tracks,guide);
   });
 });
 document.addEventListener('click',e=>{if(!e.target.closest('.bar'))clear()});
