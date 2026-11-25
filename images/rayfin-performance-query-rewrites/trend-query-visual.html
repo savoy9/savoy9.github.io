@@ -473,13 +473,13 @@ Fig3.show=function(i){
   if(e.x===0){det.innerHTML=`<b>0 · Original app query</b> · 625 ms · 4,063 ms CPU (median of 5, Round 1 forms block)`;return}
   if(e.st==="fail"){det.innerHTML=`<b>${e.x} · ${e.label}</b> · Round 1 · <span style="color:var(--fail)">output didn't match, not timed</span>`;return}
   const ctl=e.s===1?"original":"Round 1 winner",B=Fig3.best(Fig3.metric);
-  det.innerHTML=`<b>${e.x} · ${e.label}</b> · Round ${e.s} · ${B[i]?"new best":"no improvement"} · ${e.n===5?"5-pair confirmation":`pilot, ${e.n} pair${e.n>1?"s":""}`}<br>${fmt(e.el[1])} ms vs ${fmt(e.el[0])} ms ${ctl} · CPU ${fmt(e.cpu[1])} vs ${fmt(e.cpu[0])} ms`;
+  det.innerHTML=`<b>${e.x} · ${e.label}</b> · Round ${e.s} · ${B[i]?"new best":"no improvement"} · ${e.n===5?"confirmed (5 runs)":`pilot (${e.n} ${e.n>1?"runs":"run"})`}<br>${fmt(e.el[1])} ms vs ${fmt(e.el[0])} ms ${ctl} · CPU ${fmt(e.cpu[1])} vs ${fmt(e.cpu[0])} ms`;
 };
 function Fig3init(){
   Fig3.title=()=>{const k=Fig3.best(Fig3.metric).filter((b,i)=>b&&i>0).length;document.getElementById("f3t").textContent=`${EXP.length-1} experiments, ${k} improvements`};
   document.getElementById("f3legend").innerHTML=`<span><i class="dot" style="background:#c9cfcd"></i>no improvement</span><span style="color:var(--fail)">✕ output mismatch</span><span><i class="dot" style="background:#1f8a5b"></i>new best</span><span><i style="background:#1f8a5b;height:3px"></i>running best</span>`;
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{Fig3.metric=b.dataset.m;document.querySelectorAll("[data-m]").forEach(x=>x.setAttribute("aria-pressed",x===b));Fig3.title();Fig3.draw()});
-  document.getElementById("f3table").innerHTML=`<thead><tr><th>#</th><th>Round</th><th>Experiment</th><th>Result (elapsed)</th><th>Pairs</th><th>Elapsed ctl → exp</th><th>CPU ctl → exp</th></tr></thead><tbody>`+
+  document.getElementById("f3table").innerHTML=`<thead><tr><th>#</th><th>Round</th><th>Experiment</th><th>Result (elapsed)</th><th>Runs</th><th>Elapsed ctl → exp</th><th>CPU ctl → exp</th></tr></thead><tbody>`+
    EXP.slice(1).map(e=>`<tr><td>${e.x}</td><td>${e.s}</td><td class="left">${e.label}</td><td class="left">${e.st==="fail"?"output mismatch":Fig3.best("el")[e.x]?"new best":"no improvement"}</td><td>${e.st==="fail"?"—":e.n}</td><td>${e.el?fmt(e.el[0])+" → "+fmt(e.el[1]):"—"}</td><td>${e.cpu?fmt(e.cpu[0])+" → "+fmt(e.cpu[1]):"—"}</td></tr>`).join("")+`</tbody>`;
   document.getElementById("f3cap").innerHTML=`<p>One point per distinct candidate, in order of first attempt, each at its most complete measurement. Excludes the Desktop reference forms and the J9 filtered fixture.</p>`;
   Fig3.title();Fig3.draw();
